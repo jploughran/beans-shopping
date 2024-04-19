@@ -3,6 +3,7 @@ import {
     CognitoUser,
     CognitoUserAttribute,
     CognitoUserSession,
+    ISignUpResult,
 } from 'amazon-cognito-identity-js';
 import cognitoUserPool from './cognitoUserPool';
 import * as Yup from 'yup';
@@ -32,7 +33,7 @@ export const authenticateUser = (email: string, password: string): Promise<Cogni
     });
 };
 
-export const signUpUser = (email: string, password: string): Promise<CognitoUserSession> => {
+export const signUpUser = (email: string, password: string): Promise<ISignUpResult> => {
     return new Promise((resolve, reject) => {
         const attributeList: CognitoUserAttribute[] = [];
         attributeList.push(
@@ -51,7 +52,7 @@ export const signUpUser = (email: string, password: string): Promise<CognitoUser
                 console.log(data);
                 alert('User Added Successfully');
                 if (data?.user) {
-                    resolve(authenticateUser(email, password));
+                    resolve(data);
                 }
             }
         });

@@ -15,7 +15,11 @@ export const UserProvider = ({
 }: Record<string, unknown> & {
     children?: ReactNode;
 }) => {
-    const [user, setUser] = useState<CognitoUserSession | null>(null);
+    const [user, setUser] = useState<CognitoUserSession | null>(
+        cognitoUserPool
+            .getCurrentUser()
+            ?.getSession((err: Error, session: CognitoUserSession | null) => session) || null
+    );
 
     const contextValue: UserProviderContextValues = useMemo(() => {
         return { user, setUser };

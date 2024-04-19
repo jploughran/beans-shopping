@@ -20,9 +20,8 @@ export default function AppLayout() {
 
     // This layout can be deferred because it's not the root layout.
     return (
-        <Stack>
+        <Stack initialRouteName="/(tabs)">
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
     );
 }

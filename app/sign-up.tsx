@@ -17,33 +17,24 @@ import SubmitButton from '@/components/SubmitButton';
 const SignUp = () => {
     const { setUser } = useUserProviderContext();
     return (
-        <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-            <Formik
-                initialValues={initialSignUpValues}
-                onSubmit={async (values, formikHelpers) => {
-                    await signUpUser(values.email, values.password).then((user) => {
-                        setUser(user);
-                        router.push('/(app)/(tabs)/');
-                    });
-                }}
-                validateOnChange
-                validationSchema={newUserValidationSchema}
-            >
-                <YStack
-                    width={250}
-                    minHeight={250}
-                    overflow="hidden"
-                    gap="$2"
-                    margin="$3"
-                    padding="$2"
-                >
-                    <FormField placeholder="Enter email..." field="email" />
-                    <FormField placeholder="Enter password..." field="password" />
-                    <FormField placeholder="Confirm password..." field="confirmPassword" />
-                    <SubmitButton />
-                </YStack>
-            </Formik>
-        </KeyboardAwareScrollView>
+        <Formik
+            initialValues={initialSignUpValues}
+            onSubmit={async (values, formikHelpers) => {
+                await signUpUser(values.email, values.password).then((user) => {
+                    setUser(user);
+                    router.push('/(app)/(tabs)/');
+                });
+            }}
+            validateOnChange
+            validationSchema={newUserValidationSchema}
+        >
+            <YStack width={250} minHeight={250} overflow="hidden" gap="$2" margin="$3" padding="$2">
+                <FormField placeholder="Enter email..." field="email" />
+                <FormField placeholder="Enter password..." field="password" />
+                <FormField placeholder="Confirm password..." field="confirmPassword" />
+                <SubmitButton />
+            </YStack>
+        </Formik>
     );
 };
 

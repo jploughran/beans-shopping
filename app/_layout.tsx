@@ -1,12 +1,12 @@
 // import '../tamagui-web.css';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider, Theme as NavTheme } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Slot, Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { TamaguiProvider } from 'tamagui';
+import { TamaguiProvider, Theme } from 'tamagui';
 
 import { tamaguiConfig } from '../tamagui.config';
 import { useColorScheme } from 'react-native';
@@ -65,15 +65,41 @@ function RootLayoutNav() {
     return (
         <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme as string | undefined}>
             <SafeAreaProvider>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                    <UserProvider>
-                        {/* <ToastProvider> */}
-                        <Slot />
-                        {/* <SafeToastViewport /> */}
-                        {/* </ToastProvider> */}
-                    </UserProvider>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+                    <Theme name={'green'}>
+                        <UserProvider>
+                            <ToastProvider>
+                                <Slot />
+                                <SafeToastViewport />
+                            </ToastProvider>
+                        </UserProvider>
+                    </Theme>
                 </ThemeProvider>
             </SafeAreaProvider>
         </TamaguiProvider>
     );
 }
+
+const LightTheme: NavTheme = {
+    dark: false,
+    colors: {
+        primary: 'rgb(101, 186, 117)',
+        background: 'rgb(251, 254, 251)',
+        card: 'rgb(235, 249, 235)',
+        text: 'rgb(28, 28, 30)',
+        border: 'rgb(183, 223, 186)',
+        notification: 'rgb(255, 59, 48)',
+    },
+};
+
+const DarkTheme: NavTheme = {
+    dark: true,
+    colors: {
+        primary: 'rgb(85, 180, 103)',
+        background: 'rgb(22, 48, 29)',
+        card: 'rgb(29, 68, 39)',
+        text: 'rgb(251, 254, 251)',
+        border: 'rgb(101, 186, 117)',
+        notification: 'rgb(255, 59, 48)',
+    },
+};
