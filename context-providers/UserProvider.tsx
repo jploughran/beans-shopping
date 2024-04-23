@@ -1,11 +1,9 @@
-import cognitoUserPool from '@/modules/cognitoUserPool';
-import { CognitoUser, CognitoUserSession, UserData } from 'amazon-cognito-identity-js';
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
 import invariant from 'tiny-invariant';
 
 export interface UserProviderContextValues {
-    user: CognitoUserSession | null;
-    setUser: React.Dispatch<React.SetStateAction<CognitoUserSession | null>>;
+    user: any | null;
+    setUser: React.Dispatch<React.SetStateAction<any | null>>;
 }
 
 export const UserProviderContext = createContext<UserProviderContextValues | null>(null);
@@ -15,11 +13,7 @@ export const UserProvider = ({
 }: Record<string, unknown> & {
     children?: ReactNode;
 }) => {
-    const [user, setUser] = useState<CognitoUserSession | null>(
-        cognitoUserPool
-            .getCurrentUser()
-            ?.getSession((err: Error, session: CognitoUserSession | null) => session) || null
-    );
+    const [user, setUser] = useState<any | null>(null);
 
     const contextValue: UserProviderContextValues = useMemo(() => {
         return { user, setUser };

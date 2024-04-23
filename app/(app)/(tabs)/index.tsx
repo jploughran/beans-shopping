@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Text } from '@/components/Themed';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { View } from 'tamagui';
+import { SignOutButton } from '@/components/SignOutButton';
 
 export default function TabOneScreen() {
     return (
@@ -10,6 +11,7 @@ export default function TabOneScreen() {
             <View>
                 <Text style={styles.title}>Tab One</Text>
                 <View style={styles.separator} backgroundColor={'$green12'} />
+                <SignOutButton />
             </View>
         </KeyboardAwareScrollView>
     );

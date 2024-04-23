@@ -1,13 +1,8 @@
-import {
-    authenticateUser,
-    initialSignUpValues,
-    newUserValidationSchema,
-    signUpUser,
-} from '@/modules/authenticate';
+import { initialSignUpValues, newUserValidationSchema } from '@/modules/authenticate';
 import { Formik } from 'formik';
 import { memo } from 'react';
 import { YStack } from 'tamagui';
-import { useUserProviderContext } from '@/context-providers/UserProvider';
+// import { useUserProviderContext } from '@/context-providers/UserProvider';
 import { router } from 'expo-router';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { StyleSheet } from 'react-native';
@@ -15,15 +10,14 @@ import FormField from '@/components/FormField';
 import SubmitButton from '@/components/SubmitButton';
 
 const SignUp = () => {
-    const { setUser } = useUserProviderContext();
+    // const { setUser } = useUserProviderContext();
     return (
         <Formik
             initialValues={initialSignUpValues}
             onSubmit={async (values, formikHelpers) => {
-                await signUpUser(values.email, values.password).then((user) => {
-                    setUser(user);
-                    router.push('/(app)/(tabs)/');
-                });
+                // await signUpUser(values.email, values.password).then((signUpResult) => {
+                //     signUpResult.user.sendMFACode(confirmationCode, callbacks);
+                // });
             }}
             validateOnChange
             validationSchema={newUserValidationSchema}

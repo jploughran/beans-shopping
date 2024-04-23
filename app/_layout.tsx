@@ -1,4 +1,4 @@
-// import '../tamagui-web.css';
+import '../tamagui-web.css';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ThemeProvider, Theme as NavTheme } from '@react-navigation/native';
@@ -10,9 +10,7 @@ import { TamaguiProvider, Theme } from 'tamagui';
 
 import { tamaguiConfig } from '../tamagui.config';
 import { useColorScheme } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import cognitoUserPool from '@/modules/cognitoUserPool';
-import { UserProvider } from '@/context-providers/UserProvider';
+// import { UserProvider } from '@/context-providers/UserProvider';
 import { ToastProvider } from '@tamagui/toast';
 import { SafeToastViewport } from '@/components/SafeToastViewport';
 
@@ -37,10 +35,6 @@ export default function RootLayout() {
         ...FontAwesome.font,
     });
 
-    const user = cognitoUserPool.getCurrentUser();
-
-    console.log({ user });
-
     // Expo Router uses Error Boundaries to catch errors in the navigation tree.
     useEffect(() => {
         if (error) throw error;
@@ -64,18 +58,16 @@ function RootLayoutNav() {
 
     return (
         <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme as string | undefined}>
-            <SafeAreaProvider>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
-                    <Theme name={'green'}>
-                        <UserProvider>
-                            <ToastProvider>
-                                <Slot />
-                                <SafeToastViewport />
-                            </ToastProvider>
-                        </UserProvider>
-                    </Theme>
-                </ThemeProvider>
-            </SafeAreaProvider>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
+                <Theme name={'green'}>
+                    {/* <UserProvider> */}
+                    <ToastProvider>
+                        <Slot />
+                        <SafeToastViewport />
+                    </ToastProvider>
+                    {/* </UserProvider> */}
+                </Theme>
+            </ThemeProvider>
         </TamaguiProvider>
     );
 }
