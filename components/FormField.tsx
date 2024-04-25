@@ -17,6 +17,7 @@ const FormField = ({ field, placeholder }: Props) => {
                 size="$3"
                 flex={1}
                 autoCapitalize="none"
+                secureTextEntry={field === ('password' || 'confirmPassword')}
                 placeholder={placeholder}
                 inputMode={field === 'email' ? 'email' : 'text'}
                 value={fieldValue}

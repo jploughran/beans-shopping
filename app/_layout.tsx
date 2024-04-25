@@ -2,17 +2,19 @@ import '../tamagui-web.css';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ThemeProvider, Theme as NavTheme } from '@react-navigation/native';
+import { ToastProvider } from '@tamagui/toast';
 import { useFonts } from 'expo-font';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 import { TamaguiProvider, Theme } from 'tamagui';
 
 import { tamaguiConfig } from '../tamagui.config';
-import { useColorScheme } from 'react-native';
+
 // import { UserProvider } from '@/context-providers/UserProvider';
-import { ToastProvider } from '@tamagui/toast';
 import { SafeToastViewport } from '@/components/SafeToastViewport';
+import { UserProvider } from '@/context-providers/UserProvider';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -58,14 +60,14 @@ function RootLayoutNav() {
 
     return (
         <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme as string | undefined}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : LightTheme}>
-                <Theme name={'green'}>
-                    {/* <UserProvider> */}
-                    <ToastProvider>
-                        <Slot />
-                        <SafeToastViewport />
-                    </ToastProvider>
-                    {/* </UserProvider> */}
+            <ThemeProvider value={LightTheme}>
+                <Theme name="green">
+                    <UserProvider>
+                        <ToastProvider>
+                            <Slot />
+                            <SafeToastViewport />
+                        </ToastProvider>
+                    </UserProvider>
                 </Theme>
             </ThemeProvider>
         </TamaguiProvider>
@@ -77,21 +79,21 @@ const LightTheme: NavTheme = {
     colors: {
         primary: 'rgb(101, 186, 117)',
         background: 'rgb(251, 254, 251)',
-        card: 'rgb(235, 249, 235)',
+        card: 'rgb(183, 223, 186)',
         text: 'rgb(28, 28, 30)',
         border: 'rgb(183, 223, 186)',
         notification: 'rgb(255, 59, 48)',
     },
 };
 
-const DarkTheme: NavTheme = {
-    dark: true,
-    colors: {
-        primary: 'rgb(85, 180, 103)',
-        background: 'rgb(22, 48, 29)',
-        card: 'rgb(29, 68, 39)',
-        text: 'rgb(251, 254, 251)',
-        border: 'rgb(101, 186, 117)',
-        notification: 'rgb(255, 59, 48)',
-    },
-};
+// const DarkTheme: NavTheme = {
+//     dark: true,
+//     colors: {
+//         primary: 'rgb(85, 180, 103)',
+//         background: 'rgb(22, 48, 29)',
+//         card: 'rgb(29, 68, 39)',
+//         text: 'rgb(251, 254, 251)',
+//         border: 'rgb(101, 186, 117)',
+//         notification: 'rgb(255, 59, 48)',
+//     },
+// };

@@ -1,28 +1,28 @@
-import {
-    authenticateUser,
-    initialLoginValues,
-    loginValidationSchema,
-} from '@/modules/authenticate';
-import { StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { Toast, useToastState } from '@tamagui/toast';
+import { Redirect, router } from 'expo-router';
 import { Formik } from 'formik';
-import { memo } from 'react';
-import { Button, H3, Image, Label, SizableText, View, XStack, YStack } from 'tamagui';
+import { memo, useState } from 'react';
+import { Alert, StyleSheet } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Button, H3, Image, Label, SizableText, Spinner, View, XStack, YStack } from 'tamagui';
+
 import FormField from '../components/FormField';
 import SubmitButton from '../components/SubmitButton';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useUserProviderContext } from '@/context-providers/UserProvider';
-import { Toast, useToastController, useToastState } from '@tamagui/toast';
 
 import logo from '@/assets/images/BeanLogo.png';
-import { themes } from '@/constants/theme';
+import { useUserProviderContext } from '@/context-providers/UserProvider';
+import { initialLoginValues, loginValidationSchema } from '@/modules/authenticate';
+import { supabase } from '@/modules/supabase';
 
 const SignIn = () => {
-    const { setUser } = useUserProviderContext();
-    const toast = useToastController();
+    const [loading, setLoading] = useState(false);
+    const { session } = useUserProviderContext();
+    if (session) {
+        return <Redirect href="(app)/(tabs)/" />;
+    }
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-            <View backgroundColor={'$green3'} style={styles.container}>
+            <View backgroundColor="$green3" style={styles.container}>
                 <H3 marginBottom="$5">Bean Shopping</H3>
                 <Image
                     src={logo}
@@ -34,19 +34,15 @@ const SignIn = () => {
                 />
                 <Formik
                     initialValues={initialLoginValues}
-                    onSubmit={async (values) => {
-                        await authenticateUser(values.email, values.password)
-                            .then((userSession) => {
-                                setUser(userSession);
-                                toast.show('Signed In!', { duration: 1500 });
-                                router.push('/(app)/(tabs)/');
-                            })
-                            .catch((e) => {
-                                toast.show('Error signing in...!', {
-                                    message: `${e}`,
-                                    duration: 1500,
-                                });
-                            });
+                    onSubmit={async ({ email, password }) => {
+                        setLoading(true);
+                        const { error } = await supabase.auth.signInWithPassword({
+                            email,
+                            password,
+                        });
+                        router.push('/(app)/(tabs)/');
+                        if (error) Alert.alert(error.message);
+                        setLoading(false);
                     }}
                     validateOnChange
                     validationSchema={loginValidationSchema}
@@ -59,19 +55,33 @@ const SignIn = () => {
                         margin="$3"
                         padding="$2"
                     >
-                        <FormField placeholder="Enter email..." field="email" />
-                        <FormField placeholder="Enter password..." field="password" />
-                        <SubmitButton />
-                        <XStack gap="$2" justifyContent="center" marginTop="$5" alignItems="center">
-                            <Label htmlFor="sign-up">New?</Label>
-                            <Button
-                                size="$3"
-                                variant="outlined"
-                                onPress={() => router.push('/sign-up')}
-                            >
-                                Sign Up Now
-                            </Button>
-                        </XStack>
+                        {loading ? (
+                            <>
+                                <Spinner />
+                                <SizableText>Please wait...</SizableText>
+                            </>
+                        ) : (
+                            <>
+                                <FormField placeholder="Enter email..." field="email" />
+                                <FormField placeholder="Enter password..." field="password" />
+                                <SubmitButton />
+                                <XStack
+                                    gap="$2"
+                                    justifyContent="center"
+                                    marginTop="$5"
+                                    alignItems="center"
+                                >
+                                    <Label htmlFor="sign-up">New?</Label>
+                                    <Button
+                                        size="$3"
+                                        variant="outlined"
+                                        onPress={() => router.push('/sign-up')}
+                                    >
+                                        Sign Up Now
+                                    </Button>
+                                </XStack>
+                            </>
+                        )}
                         <CurrentToast />
                     </YStack>
                 </Formik>

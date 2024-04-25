@@ -1,9 +1,11 @@
+import { Session } from '@supabase/supabase-js';
 import { ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
 import invariant from 'tiny-invariant';
 
+import { supabase } from '@/modules/supabase';
+
 export interface UserProviderContextValues {
-    user: any | null;
-    setUser: React.Dispatch<React.SetStateAction<any | null>>;
+    session: Session | null;
 }
 
 export const UserProviderContext = createContext<UserProviderContextValues | null>(null);
@@ -13,11 +15,29 @@ export const UserProvider = ({
 }: Record<string, unknown> & {
     children?: ReactNode;
 }) => {
-    const [user, setUser] = useState<any | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
+
+    useEffect(() => {
+        const getSessions = async () => {
+            await supabase.auth
+                .getSession()
+                .then(({ data: { session } }) => {
+                    setSession(session);
+                })
+                .catch((e) => {
+                    console.log('error in auth.getSession()', { e });
+                });
+        };
+        getSessions();
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+    }, []);
 
     const contextValue: UserProviderContextValues = useMemo(() => {
-        return { user, setUser };
-    }, [user, setUser]);
+        return { session };
+    }, [session]);
 
     return (
         <UserProviderContext.Provider value={contextValue}>{children}</UserProviderContext.Provider>
@@ -34,6 +54,6 @@ export const useUserProviderContext = () => {
 
 export const useUserToken = () => {
     return {
-        userIdToken: useUserProviderContext().user?.getIdToken().getJwtToken(),
+        userAccessToken: useUserProviderContext().session?.access_token,
     };
 };
