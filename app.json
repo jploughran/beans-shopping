@@ -1,10 +1,16 @@
 {
-    "expo": {
-        "extra": {
-            "eas": {
-                "projectId": "0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
-            }
-        },
-        "scheme": "beanshopper"
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
+      }
+    },
+    "scheme": "beanshopper",
+    "android": {
+      "package": "com.synergetx.beansshopping"
+    },
+    "ios": {
+      "bundleIdentifier": "com.synergetx.beansshopping"
     }
+  }
 }
