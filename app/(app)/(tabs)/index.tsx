@@ -1,63 +1,66 @@
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { ListPlus } from '@tamagui/lucide-icons';
+import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { Dimensions, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Button, ListItem, View as TamaguiView } from 'tamagui';
 
-import { SignOutButton } from '@/components/SignOutButton';
-import { useAllUserLists } from '@/context-providers/ListProvider';
+import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { List } from '@/types/list';
 
 const keyExtractor = (item: List, index: number) => index.toString();
 
 export default function TabOneScreen() {
-    const lists = useAllUserLists();
+    const { allLists: lists, setSelectedList } = useListsProviderContext();
 
-    const renderSingleRow: ListRenderItem<List> = useCallback(({ item, ...rest }) => {
-        if (!item) {
-            return null;
-        }
-        return (
-            <ListItem
-                title={item.list_name}
-                borderRadius="$4"
-                borderColor="$green4"
-                borderWidth="$0.5"
-                backgroundColor="$green1.25"
-                marginTop="$1.5"
-                height="$5"
-                pressTheme
-                onPress={() => {
-                    console.log({ name: item.list_name });
-                }}
-            />
-        );
-    }, []);
+    const renderSingleRow: ListRenderItem<List> = useCallback(
+        ({ item, ...rest }) => {
+            if (!item) {
+                return null;
+            }
+            return (
+                <ListItem
+                    title={item.list_name}
+                    borderRadius="$4"
+                    borderColor="$green4"
+                    borderWidth="$0.5"
+                    backgroundColor="$green1.25"
+                    marginTop="$1.5"
+                    height="$5"
+                    pressTheme
+                    onPress={() => {
+                        console.log({ name: item.list_name });
+                        setSelectedList(item);
+                        router.push('/editList');
+                    }}
+                />
+            );
+        },
+        [setSelectedList],
+    );
 
     console.log({ lists });
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-            <Button icon={ListPlus} variant="outlined" size="$5">
-                Add List
-            </Button>
             <TamaguiView
                 style={{
-                    minHeight: 200,
-                    width: Dimensions.get('screen').width * 0.8,
+                    minHeight: 100,
+                    width: Dimensions.get('screen').width,
                 }}
-                marginTop="$2"
+                padding="$4"
             >
                 <FlashList
                     keyExtractor={keyExtractor}
-                    data={lists?.concat(lists)}
+                    data={lists}
                     renderItem={renderSingleRow}
                     estimatedItemSize={200}
                     // ItemSeparatorComponent={<Separator />}
                 />
             </TamaguiView>
-            <TamaguiView style={styles.separator} backgroundColor="$green12" />
-            <SignOutButton />
+            <Button icon={ListPlus} size="$4">
+                Add List
+            </Button>
         </KeyboardAwareScrollView>
     );
 }

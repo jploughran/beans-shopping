@@ -11,7 +11,8 @@ export interface List {
 export interface ListItemWithData extends ListItem, StoreItem {}
 
 export interface ListItem {
-    created_at: string;
+    completed: boolean;
+    created_at: string | null;
     item_id: number;
     list_item_id: number;
     list_id: number;
@@ -20,12 +21,12 @@ export interface ListItem {
 }
 
 export interface StoreItem {
-    created_at: string;
-    description?: string;
+    created_at: string | null;
+    description?: string | null;
     item_id: number;
     item_name: string;
     price?: number;
-    price_type?: number;
+    price_type?: 'count' | 'weight';
     store_id: number;
     user_id: string;
 }
@@ -45,7 +46,7 @@ export enum PriceType {
 
 export const LISTS = 'lists';
 export const RECIPES = 'recipes';
-export const LIST_ITEMS = 'listItems';
+export const LIST_ITEMS = 'list_items';
 export const ITEMS = 'items';
 export const ITEM_PRICE_TYPES = 'item_price_types';
 

@@ -9,7 +9,7 @@
         "web": "expo start --web",
         "test": "jest --watchAll",
         "lint": "eslint app",
-        "build:dev-client": "eas build --profile development --local --clear-cache",
+        "build:dev-client": "eas build --profile development --clear-cache",
         "expo-doctor": "npx expo-doctor"
     },
     "jest": {

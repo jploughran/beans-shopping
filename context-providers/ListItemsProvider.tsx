@@ -16,16 +16,16 @@ import {
     addListItem,
     getListItemsWithData,
     handleRemoveSupabaseRow,
+    updateListItem,
 } from '@/modules/supabase-list-utils';
 import { LIST_ITEMS, ListItem, ListItemWithData } from '@/types/list';
+import { supabase } from '@/modules/supabase';
 
 export interface ListItemsProviderContextValues {
-    handleAddListItem: (
-        itemToAdd: Pick<ListItemWithData, 'store_id' | 'item_name' | 'list_id'>,
-    ) => Promise<void>;
     handleRemoveListItem: (itemToRemoveId: number) => Promise<void>;
     itemsWithCost: ListItemWithData[];
     setItemsWithCost: Dispatch<SetStateAction<ListItemWithData[]>>;
+    handleUpdateListItem: (itemToUpdate: ListItemWithData) => Promise<void>;
 }
 
 export const ListItemsProviderContext = createContext<ListItemsProviderContextValues | null>(null);
@@ -37,7 +37,6 @@ export const ListItemsProvider = ({
 }) => {
     const [itemsWithCost, setItemsWithCost] = useState<ListItemWithData[]>([]);
     const listId = useSelectedList()?.list_id;
-    console.log({ itemsWithCost });
     useEffect(() => {
         if (listId) {
             const getListItems = async () => {
@@ -47,14 +46,28 @@ export const ListItemsProvider = ({
             };
             getListItems();
         }
+
+        return () => {
+            supabase.removeAllChannels();
+        };
     }, [listId]);
 
-    const handleAddListItem = useCallback(
-        async (itemToAdd: Pick<ListItemWithData, 'store_id' | 'item_name' | 'list_id'>) => {
-            addListItem(itemToAdd.store_id, itemToAdd.item_name, itemToAdd.list_id);
-        },
-        [],
-    );
+    const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
+        await updateListItem(itemToUpdate)
+            .then((updatedItem) => {
+                setItemsWithCost((prev) =>
+                    prev.reduce((itemsToReturn, currentItem) => {
+                        if (currentItem.list_item_id === updatedItem.list_item_id) {
+                            itemsToReturn.push(updatedItem);
+                        } else {
+                            itemsToReturn.push(currentItem);
+                        }
+                        return itemsToReturn;
+                    }, [] as ListItemWithData[]),
+                );
+            })
+            .catch((e) => console.log('Error in [handleUpdateListItem]', { e }));
+    }, []);
 
     const handleRemoveListItem = useCallback(async (itemToRemoveId: number) => {
         handleRemoveSupabaseRow<ListItem>('list_item_id', itemToRemoveId, LIST_ITEMS).then(() => {
@@ -66,12 +79,12 @@ export const ListItemsProvider = ({
 
     const contextValue: ListItemsProviderContextValues = useMemo(() => {
         return {
-            handleAddListItem,
             itemsWithCost,
             setItemsWithCost,
             handleRemoveListItem,
+            handleUpdateListItem,
         };
-    }, [handleAddListItem, handleRemoveListItem, itemsWithCost]);
+    }, [handleRemoveListItem, handleUpdateListItem, itemsWithCost]);
 
     return (
         <ListItemsProviderContext.Provider value={contextValue}>
