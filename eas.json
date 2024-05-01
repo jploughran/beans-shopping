@@ -6,6 +6,7 @@
         "development": {
             "developmentClient": true,
             "distribution": "internal",
+            "channel": "development",
             "android": {
                 "buildType": "apk"
             },
@@ -14,9 +15,23 @@
             }
         },
         "preview": {
-            "distribution": "internal"
+            "distribution": "internal",
+            "channel": "preview-bean-shopping",
+            "android": {
+                "buildType": "apk",
+                "autoIncrement": "versionCode"
+            },
+            "ios": {
+                "applicationArchivePath": "ios/build/*",
+                "resourceClass": "m-medium"
+            }
         },
-        "production": {}
+        "production": {
+            "ios": {
+                "resourceClass": "m-medium"
+            },
+            "channel": "production-bean-shopping"
+        }
     },
     "submit": {
         "production": {}
