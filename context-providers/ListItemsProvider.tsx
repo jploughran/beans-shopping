@@ -12,16 +12,17 @@ import invariant from 'tiny-invariant';
 
 import { useSelectedList } from './ListProvider';
 
+import { supabase } from '@/modules/supabase';
 import {
-    addListItem,
+    getListItemsForStore,
     getListItemsWithData,
     handleRemoveSupabaseRow,
     updateListItem,
 } from '@/modules/supabase-list-utils';
 import { LIST_ITEMS, ListItem, ListItemWithData } from '@/types/list';
-import { supabase } from '@/modules/supabase';
 
 export interface ListItemsProviderContextValues {
+    allStoreItemsWithCost: ListItemWithData[];
     handleRemoveListItem: (itemToRemoveId: number) => Promise<void>;
     itemsWithCost: ListItemWithData[];
     setItemsWithCost: Dispatch<SetStateAction<ListItemWithData[]>>;
@@ -36,13 +37,20 @@ export const ListItemsProvider = ({
     children?: React.ReactNode;
 }) => {
     const [itemsWithCost, setItemsWithCost] = useState<ListItemWithData[]>([]);
-    const listId = useSelectedList()?.list_id;
+    const list = useSelectedList();
+    const [allStoreItemsWithCost, setAllStoreItemsWithCost] = useState<ListItemWithData[]>([]);
+
     useEffect(() => {
-        if (listId) {
+        if (list?.list_id && list.store_id) {
             const getListItems = async () => {
-                await getListItemsWithData(listId)
-                    .then((listItems) => setItemsWithCost(listItems))
-                    .catch((e) => console.error(e));
+                await Promise.all([
+                    getListItemsWithData(list.list_id)
+                        .then((listItems) => setItemsWithCost(listItems))
+                        .catch((e) => console.error(e)),
+                    getListItemsForStore(list.store_id)
+                        .then((listItems) => setAllStoreItemsWithCost(listItems))
+                        .catch((e) => console.error(e)),
+                ]);
             };
             getListItems();
         }
@@ -50,7 +58,7 @@ export const ListItemsProvider = ({
         return () => {
             supabase.removeAllChannels();
         };
-    }, [listId]);
+    }, [list?.list_id, list?.store_id]);
 
     const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
         await updateListItem(itemToUpdate)
@@ -79,12 +87,13 @@ export const ListItemsProvider = ({
 
     const contextValue: ListItemsProviderContextValues = useMemo(() => {
         return {
+            allStoreItemsWithCost,
             itemsWithCost,
             setItemsWithCost,
             handleRemoveListItem,
             handleUpdateListItem,
         };
-    }, [handleRemoveListItem, handleUpdateListItem, itemsWithCost]);
+    }, [allStoreItemsWithCost, handleRemoveListItem, handleUpdateListItem, itemsWithCost]);
 
     return (
         <ListItemsProviderContext.Provider value={contextValue}>

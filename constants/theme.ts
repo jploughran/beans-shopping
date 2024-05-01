@@ -111,7 +111,7 @@ export const palettes = (() => {
     const transparent = (hsl: string, opacity = 0) =>
         hsl.replace(`%)`, `%, ${opacity})`).replace(`hsl(`, `hsla(`);
 
-    const getColorPalette = (colors: Object): string[] => {
+    const getColorPalette = (colors: object): string[] => {
         const colorPalette = Object.values(colors);
         // make the transparent color vibrant and towards the middle
         const colorI = colorPalette.length - 4;
@@ -180,14 +180,14 @@ export const palettes = (() => {
 
     const lightPalettes = objectFromEntries(
         objectKeys(colorTokens.light).map(
-            (key) => [`light_${key}`, getColorPalette(colorTokens.light[key])] as const
-        )
+            (key) => [`light_${key}`, getColorPalette(colorTokens.light[key])] as const,
+        ),
     );
 
     const darkPalettes = objectFromEntries(
         objectKeys(colorTokens.dark).map(
-            (key) => [`dark_${key}`, getColorPalette(colorTokens.dark[key])] as const
-        )
+            (key) => [`dark_${key}`, getColorPalette(colorTokens.dark[key])] as const,
+        ),
     );
 
     const colorPalettes = {
@@ -533,7 +533,7 @@ const themeBuilder = createThemeBuilder()
         },
         {
             avoidNestingWithin: ['alt1', 'alt2'],
-        }
+        },
     );
 
 // --- themes ---
@@ -548,10 +548,10 @@ export const themes = themesIn as ThemesOut;
 
 export function postfixObjKeys<
     A extends { [key: string]: Variable<string> | string },
-    B extends string
+    B extends string,
 >(
     obj: A,
-    postfix: B
+    postfix: B,
 ): {
     [Key in `${keyof A extends string ? keyof A : never}${B}`]: Variable<string> | string;
 } {
@@ -589,6 +589,6 @@ export type EntriesToObject<ARR_T extends EntriesType> = MergeIntersectingObject
     UnionToIntersection<UnionObjectFromArrayOfPairs<ARR_T>>
 >;
 
-export function objectKeys<O extends Object>(obj: O) {
+export function objectKeys<O extends object>(obj: O) {
     return Object.keys(obj) as Array<keyof O>;
 }

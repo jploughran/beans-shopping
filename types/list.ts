@@ -1,3 +1,5 @@
+import { RowType } from './supabase-types';
+
 export interface List {
     completed: boolean;
     created_at: string;
@@ -7,6 +9,8 @@ export interface List {
     total_cost?: number;
     user_id: string;
 }
+
+export interface Store extends RowType<'stores'> {}
 
 export interface ListItemWithData extends ListItem, StoreItem {}
 
@@ -22,7 +26,6 @@ export interface ListItem {
 
 export interface StoreItem {
     created_at: string | null;
-    description?: string | null;
     item_id: number;
     item_name: string;
     price?: number;

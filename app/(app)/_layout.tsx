@@ -19,7 +19,7 @@ export default function AppLayout() {
                     <Stack initialRouteName="/(tabs)">
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                         <Stack.Screen
-                            name="EditList"
+                            name="editList"
                             options={{
                                 headerShown: true,
                                 headerBackVisible: true,

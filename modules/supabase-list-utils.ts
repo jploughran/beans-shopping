@@ -1,16 +1,8 @@
 import { InitialListItemFormValue } from './add-list-item-validation';
 import { supabase } from './supabase';
 
-import {
-    ITEMS,
-    LISTS,
-    LIST_ITEMS,
-    List,
-    ListItem,
-    ListItemWithData,
-    StoreItem,
-} from '@/types/list';
-import { Database, ExistingTables, InsertType, RowType, Tables } from '@/types/supabase-types';
+import { ITEMS, LISTS, LIST_ITEMS, List, ListItemWithData, Store } from '@/types/list';
+import { Database, ExistingTables, InsertType } from '@/types/supabase-types';
 
 export const addListToTable = async (storeId: number, listName: string) => {
     const { data, error } = await supabase
@@ -94,11 +86,30 @@ export async function handleUpdateSupabaseRow<T extends ExistingTables>(
         .then(({ data, error }) => (error ? Promise.reject(error) : Promise.resolve(data[0])));
 }
 
+export const getStores = async () => {
+    return supabase
+        .from('stores')
+        .select(`*`)
+        .then(({ data, error }) => {
+            return data ? Promise.resolve(data as Store[]) : Promise.reject(error);
+        });
+};
+
 export const getListItemsWithData = async (listId: number) => {
     return supabase
         .from('list_items_with_store_data')
         .select(`*`)
         .eq('list_id', listId)
+        .then(({ data, error }) => {
+            return data ? Promise.resolve(data as ListItemWithData[]) : Promise.reject(error);
+        });
+};
+
+export const getListItemsForStore = async (storeId: number) => {
+    return supabase
+        .from('list_items_with_store_data')
+        .select(`*`)
+        .eq('store_id', storeId)
         .then(({ data, error }) => {
             return data ? Promise.resolve(data as ListItemWithData[]) : Promise.reject(error);
         });

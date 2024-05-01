@@ -1,17 +1,11 @@
+import { BottomSheetView, useBottomSheetInternal } from '@gorhom/bottom-sheet';
 import { Formik, FormikErrors } from 'formik';
-import { useCallback, useMemo } from 'react';
-import {
-    Adapt,
-    Button,
-    Input,
-    Label,
-    Popover,
-    SizableText,
-    ToggleGroup,
-    XStack,
-    YStack,
-} from 'tamagui';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Button, Input, Label, SizableText, ToggleGroup, XStack, YStack } from 'tamagui';
 
+import StoreItemsList from './StoreItemsList';
+
+import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import {
@@ -19,16 +13,19 @@ import {
     newListItemValidationSchema,
 } from '@/modules/add-list-item-validation';
 import { addListItem } from '@/modules/supabase-list-utils';
+import { Keyboard } from 'react-native';
 
 interface Props {
-    setOpenForm: React.Dispatch<React.SetStateAction<boolean>>;
+    // setOpenForm: () => void;
     itemToEdit?: InitialListItemFormValue;
     handleFormSubmit?: (formValues: InitialListItemFormValue) => Promise<void>;
 }
 
-export function AddListItemForm({ setOpenForm, itemToEdit, handleFormSubmit }: Props) {
+export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
     const { selectedList } = useListsProviderContext();
     const { setItemsWithCost } = useListItemsProviderContext();
+    const { handleClosePress, handleOpenPress } = useBottomSheetProviderContext();
+    const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
 
     const initialValues: InitialListItemFormValue = useMemo(
         () =>
@@ -60,10 +57,13 @@ export function AddListItemForm({ setOpenForm, itemToEdit, handleFormSubmit }: P
                     })
                     .catch((e) => console.log(e));
             }
-            setOpenForm(false);
+            handleClosePress();
         },
-        [handleFormSubmit, setItemsWithCost, setOpenForm],
+        [handleClosePress, handleFormSubmit, setItemsWithCost],
     );
+
+    console.log({ initialValues });
+
     return (
         <Formik
             initialValues={initialValues}
@@ -71,145 +71,140 @@ export function AddListItemForm({ setOpenForm, itemToEdit, handleFormSubmit }: P
             onSubmit={async (formValues) => {
                 await handleFormSubmission(formValues);
             }}
+            validateOnMount
+            enableReinitialize
         >
             {({ values, errors, dirty, setFieldValue, handleSubmit, isValid }) => (
-                <Popover size="$10" allowFlip open onOpenChange={(open) => setOpenForm(open)}>
-                    <Adapt when="sm" platform="touch">
-                        <Popover.Sheet modal dismissOnSnapToBottom>
-                            <Popover.Sheet.Frame padding="$4">
-                                <Adapt.Contents />
-                            </Popover.Sheet.Frame>
-                            <Popover.Sheet.Overlay
-                                animation="lazy"
-                                enterStyle={{ opacity: 0 }}
-                                exitStyle={{ opacity: 0 }}
+                <BottomSheetView style={{ flex: 1 }}>
+                    <YStack gap="$3" flex={1} padding="$1" marginTop="$2">
+                        <XStack gap="$3" width="100%" alignItems="center">
+                            <Label size="$2" htmlFor="name" flex={1}>
+                                Name
+                            </Label>
+                            <Input
+                                size="$3"
+                                flex={4}
+                                placeholder="Enter name here..."
+                                value={values.item_name}
+                                onChangeText={(name) => {
+                                    console.log({ values });
+                                    setFieldValue('item_name', name);
+                                }}
+                                onFocus={() => {
+                                    shouldHandleKeyboardEvents.value = true;
+                                }}
+                                onBlur={() => {
+                                    shouldHandleKeyboardEvents.value = false;
+                                }}
+                                clearButtonMode="always"
                             />
-                        </Popover.Sheet>
-                    </Adapt>
-
-                    <Popover.Content
-                        borderWidth={1}
-                        flex={1}
-                        alignSelf="center"
-                        borderColor="$borderColor"
-                        enterStyle={{ y: -20, opacity: 0 }}
-                        exitStyle={{ y: -20, opacity: 0 }}
-                        elevate
-                        animation={[
-                            'quick',
-                            {
-                                opacity: {
-                                    overshootClamping: true,
-                                },
-                            },
-                        ]}
-                    >
-                        <YStack gap="$3" flex={1}>
-                            <XStack gap="$3" width="100%" alignItems="center">
-                                <Label size="$3" htmlFor="name" flex={1}>
-                                    Name
-                                </Label>
-                                <Input
-                                    size="$3"
-                                    flex={5}
-                                    placeholder="Enter name here..."
-                                    value={values.item_name}
-                                    onChangeText={(name) => setFieldValue('item_name', name)}
-                                />
-                            </XStack>
-                            <XStack
-                                gap="$3"
-                                width="100%"
-                                alignItems="center"
-                                justifyContent="flex-start"
+                        </XStack>
+                        <StoreItemsList />
+                        <XStack
+                            gap="$2"
+                            width="100%"
+                            alignItems="center"
+                            justifyContent="flex-start"
+                        >
+                            <Label size="$2" htmlFor="name" flex={1}>
+                                Price Type
+                            </Label>
+                            <ToggleGroup
+                                flex={4}
+                                orientation="horizontal"
+                                id="price_type"
+                                type="single"
+                                size="$1"
+                                disableDeactivation
+                                value={values.price_type}
+                                onValueChange={(type) => setFieldValue('price_type', type)}
                             >
-                                <Label size="$2" htmlFor="name">
-                                    Price Type
-                                </Label>
-                                <ToggleGroup
-                                    orientation="horizontal"
-                                    id="price_type"
-                                    type="single"
-                                    size="$1"
-                                    disableDeactivation
-                                    value={values.price_type}
-                                    onValueChange={(type) => setFieldValue('price_type', type)}
-                                >
-                                    <ToggleGroup.Item value="weight" aria-label="Left aligned">
-                                        <SizableText>Weight</SizableText>
-                                    </ToggleGroup.Item>
-                                    <ToggleGroup.Item value="count" aria-label="Center aligned">
-                                        <SizableText>Count</SizableText>
-                                    </ToggleGroup.Item>
-                                </ToggleGroup>
-                            </XStack>
-                            <XStack gap="$3" width="100%" alignItems="center">
-                                <Label size="$3" htmlFor="name" flex={1}>
-                                    Quantity
-                                </Label>
-                                <Input
-                                    size="$3"
-                                    flex={5}
-                                    placeholder="Enter quantity here..."
-                                    keyboardType="numeric"
-                                    value={values.quantity}
-                                    onChangeText={(quantity) => setFieldValue('quantity', quantity)}
-                                />
-                            </XStack>
-                            <XStack gap="$3" width="100%" alignItems="center">
-                                <Label size="$2" htmlFor="name" flex={1}>
-                                    Price/item
-                                </Label>
-                                <Input
-                                    size="$3"
-                                    flex={5}
-                                    placeholder="Enter price (estimated) here..."
-                                    keyboardType="numeric"
-                                    value={values.price}
-                                    onChangeText={(price) => setFieldValue('price', price)}
-                                />
-                            </XStack>
+                                <ToggleGroup.Item value="weight" aria-label="Left aligned">
+                                    <SizableText>Weight</SizableText>
+                                </ToggleGroup.Item>
+                                <ToggleGroup.Item value="count" aria-label="Center aligned">
+                                    <SizableText>Count</SizableText>
+                                </ToggleGroup.Item>
+                            </ToggleGroup>
+                        </XStack>
+                        <XStack gap="$3" width="100%" alignItems="center">
+                            <Label size="$2" htmlFor="name" flex={1}>
+                                Quantity
+                            </Label>
+                            <Input
+                                size="$3"
+                                flex={4}
+                                placeholder="Enter quantity here..."
+                                keyboardType="numeric"
+                                value={values.quantity}
+                                onChangeText={(quantity) => setFieldValue('quantity', quantity)}
+                                onFocus={() => {
+                                    shouldHandleKeyboardEvents.value = true;
+                                }}
+                                onBlur={() => {
+                                    shouldHandleKeyboardEvents.value = false;
+                                }}
+                            />
+                        </XStack>
+                        <XStack gap="$3" width="100%" alignItems="center">
+                            <Label size="$1" htmlFor="name" flex={1}>
+                                Price/item
+                            </Label>
+                            <Input
+                                size="$3"
+                                flex={4}
+                                placeholder="Enter price (estimated) here..."
+                                keyboardType="numeric"
+                                value={values.price}
+                                onChangeText={(price) => setFieldValue('price', price)}
+                                onFocus={() => {
+                                    shouldHandleKeyboardEvents.value = true;
+                                }}
+                                onBlur={() => {
+                                    shouldHandleKeyboardEvents.value = false;
+                                }}
+                            />
+                        </XStack>
 
-                            <XStack gap="$4" justifyContent="flex-end">
-                                <Button
-                                    minWidth={100}
-                                    variant="outlined"
-                                    borderWidth="$0.25"
-                                    size="$3"
-                                    onPress={() => {
-                                        setOpenForm(false);
-                                    }}
-                                >
-                                    Close
-                                </Button>
-                                <Button
-                                    minWidth={100}
-                                    disabled={!dirty || !isValid}
-                                    size="$3"
-                                    disabledStyle={{ backgroundColor: '$red4' }}
-                                    onPress={() => {
-                                        handleSubmit();
-                                    }}
-                                >
-                                    Submit
-                                </Button>
-                            </XStack>
-                            <YStack marginTop="$3">
-                                {(
-                                    Object.keys(
-                                        errors,
-                                    ) as (keyof FormikErrors<InitialListItemFormValue>)[]
-                                ).map((field: keyof FormikErrors<InitialListItemFormValue>) => (
-                                    <SizableText key={field} size="$3" color="$red10">
-                                        {typeof errors[field] === 'string'
-                                            ? (errors[field] as string)
-                                            : JSON.stringify(errors?.[field])}
-                                    </SizableText>
-                                ))}
-                            </YStack>
+                        <XStack gap="$4" justifyContent="flex-end">
+                            <Button
+                                minWidth={100}
+                                variant="outlined"
+                                borderWidth="$0.25"
+                                size="$3"
+                                onPress={() => {
+                                    handleClosePress();
+                                }}
+                            >
+                                Close
+                            </Button>
+                            <Button
+                                minWidth={100}
+                                disabled={!isValid}
+                                size="$3"
+                                disabledStyle={{ backgroundColor: '$red4' }}
+                                onPress={() => {
+                                    handleSubmit();
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        </XStack>
+                        <YStack marginTop="$3">
+                            {(
+                                Object.keys(
+                                    errors,
+                                ) as (keyof FormikErrors<InitialListItemFormValue>)[]
+                            ).map((field: keyof FormikErrors<InitialListItemFormValue>) => (
+                                <SizableText key={field} size="$3" color="$red10">
+                                    {typeof errors[field] === 'string'
+                                        ? (errors[field] as string)
+                                        : JSON.stringify(errors?.[field])}
+                                </SizableText>
+                            ))}
                         </YStack>
-                    </Popover.Content>
-                </Popover>
+                    </YStack>
+                </BottomSheetView>
             )}
         </Formik>
     );

@@ -3,6 +3,7 @@ import {
     ReactNode,
     SetStateAction,
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -10,13 +11,16 @@ import {
 } from 'react';
 import invariant from 'tiny-invariant';
 
+import { ListCreationType } from '@/components/AddListForm';
 import { supabase } from '@/modules/supabase';
-import { List } from '@/types/list';
+import { handleSupabaseInsertRow } from '@/modules/supabase-list-utils';
+import { LISTS, List } from '@/types/list';
 
 export interface ListsProviderContextValues {
     allLists: List[] | undefined;
     selectedList: List | undefined;
     setSelectedList: Dispatch<SetStateAction<List | undefined>>;
+    handleAddList: (formValues: ListCreationType) => Promise<void>;
 }
 
 export const ListsProviderContext = createContext<ListsProviderContextValues | null>(null);
@@ -43,9 +47,15 @@ export const ListsProvider = ({
         getAllListsForUser();
     }, []);
 
+    const handleAddList = useCallback(async (formValues: ListCreationType) => {
+        await handleSupabaseInsertRow(formValues, LISTS).then((listAdded) =>
+            setAllLists((prev) => prev?.concat([listAdded as List])),
+        );
+    }, []);
+
     const contextValue: ListsProviderContextValues = useMemo(() => {
-        return { allLists, selectedList, setSelectedList };
-    }, [allLists, selectedList]);
+        return { allLists, selectedList, setSelectedList, handleAddList };
+    }, [allLists, selectedList, handleAddList]);
 
     return (
         <ListsProviderContext.Provider value={contextValue}>

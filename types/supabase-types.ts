@@ -6,7 +6,6 @@ export type Database = {
             items: {
                 Row: {
                     created_at: string | null;
-                    description: string | null;
                     item_id: number;
                     item_name: string;
                     price: number | null;
@@ -16,7 +15,6 @@ export type Database = {
                 };
                 Insert: {
                     created_at?: string | null;
-                    description?: string | null;
                     item_id?: number;
                     item_name: string;
                     price?: number | null;
@@ -26,7 +24,6 @@ export type Database = {
                 };
                 Update: {
                     created_at?: string | null;
-                    description?: string | null;
                     item_id?: number;
                     item_name?: string;
                     price?: number | null;
@@ -212,7 +209,6 @@ export type Database = {
             list_items_with_store_data: {
                 Row: {
                     created_at: string | null;
-                    description: string | null;
                     item_id: number | null;
                     item_name: string | null;
                     list_id: number | null;

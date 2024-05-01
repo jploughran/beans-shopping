@@ -1,35 +1,20 @@
 import { Check } from '@tamagui/lucide-icons';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback } from 'react';
 import { ListItem, XStack, Checkbox, Label, CheckedState } from 'tamagui';
 
-import { AddListItemForm } from './AddListItemForm';
-
+import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
 import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import { ListItemWithData } from '@/types/list';
 
 interface Props {
     item: ListItemWithData;
+    setItemToEdit: React.Dispatch<React.SetStateAction<InitialListItemFormValue | undefined>>;
 }
 
-const StoreListItem = ({ item }: Props) => {
+const StoreListItem = ({ item, setItemToEdit }: Props) => {
     const { handleUpdateListItem } = useListItemsProviderContext();
-    const [openForm, setOpenForm] = useState(false);
-    const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
-
-    const handleSubmit = useCallback(
-        async (formValues: InitialListItemFormValue) => {
-            const valuesToSubmit = {
-                ...formValues,
-                description: '',
-                price: parseFloat(formValues.price),
-                quantity: parseFloat(formValues.quantity),
-            } as ListItemWithData;
-            console.log(`handleSubmit called`, { valuesToSubmit });
-            await handleUpdateListItem(valuesToSubmit);
-        },
-        [handleUpdateListItem],
-    );
+    const { handleOpenPress } = useBottomSheetProviderContext();
 
     const handleChangeChecked = useCallback(
         async (checked: CheckedState) => {
@@ -41,7 +26,7 @@ const StoreListItem = ({ item }: Props) => {
                     price: item.price?.toString() ?? '',
                     quantity: item.quantity?.toString() ?? '',
                 });
-                setOpenForm(true);
+                handleOpenPress();
             } else {
                 await handleUpdateListItem({
                     ...item,
@@ -49,17 +34,11 @@ const StoreListItem = ({ item }: Props) => {
                 } as ListItemWithData);
             }
         },
-        [handleUpdateListItem, item],
+        [handleOpenPress, handleUpdateListItem, item, setItemToEdit],
     );
 
     return (
-        <ListItem
-            borderRadius="$4"
-            marginTop="$2"
-            paddingHorizontal="$4"
-            paddingVertical="$1"
-            key={item.list_item_id + item.item_name}
-        >
+        <ListItem borderRadius="$4" marginTop="$2" paddingHorizontal="$4" paddingVertical="$1">
             <XStack alignItems="center" gap="$4" justifyContent="space-between" width="100%">
                 <Checkbox size="$4" checked={item.completed} onCheckedChange={handleChangeChecked}>
                     <Checkbox.Indicator>
@@ -73,13 +52,6 @@ const StoreListItem = ({ item }: Props) => {
                         : undefined}
                 </Label>
             </XStack>
-            {openForm ? (
-                <AddListItemForm
-                    setOpenForm={setOpenForm}
-                    itemToEdit={itemToEdit}
-                    handleFormSubmit={handleSubmit}
-                />
-            ) : null}
         </ListItem>
     );
 };
