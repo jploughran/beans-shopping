@@ -1,6 +1,8 @@
-import { FormikErrors, useFormikContext } from 'formik';
+import { useFormikContext } from 'formik';
 import { memo } from 'react';
-import { Button, SizableText, View, YStack } from 'tamagui';
+import { Button, View } from 'tamagui';
+
+import FormErrorText from './FormErrorText';
 
 import { NewUserInfoUI } from '@/modules/authenticate';
 
@@ -20,17 +22,7 @@ const SubmitButton = () => {
             >
                 Sign In
             </Button>
-            <YStack marginTop="$3">
-                {(Object.keys(errors) as (keyof FormikErrors<NewUserInfoUI>)[]).map(
-                    (field: keyof FormikErrors<NewUserInfoUI>) => (
-                        <SizableText key={field} size="$3" color="$red10">
-                            {typeof errors[field] === 'string'
-                                ? (errors[field] as string)
-                                : JSON.stringify(errors?.[field])}
-                        </SizableText>
-                    ),
-                )}
-            </YStack>
+            <FormErrorText errors={errors} />
         </View>
     );
 };

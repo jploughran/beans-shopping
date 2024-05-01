@@ -9,6 +9,7 @@ import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetPr
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { newListValidationSchema } from '@/modules/add-list-item-validation';
 import { RowType } from '@/types/supabase-types';
+import FormErrorText from './FormErrorText';
 
 export type ListCreationType = Omit<
     RowType<'lists'>,
@@ -33,18 +34,33 @@ function AddListForm({ setOpenForm }: Props) {
         <Formik
             initialValues={initialValues}
             validationSchema={newListValidationSchema}
-            onSubmit={async (formValues) => {
-                await handleAddList(formValues).then(() => handleClosePress());
+            onSubmit={async (formValues, { resetForm }) => {
+                await handleAddList(formValues).then(() => {
+                    resetForm();
+                    handleClosePress();
+                });
             }}
         >
             {({ values, errors, dirty, setFieldValue, handleSubmit, isValid, resetForm }) => (
                 <BottomSheetView style={{ flex: 1 }}>
-                    <YStack gap="$3" flex={1}>
+                    <YStack
+                        gap="$3"
+                        flex={1}
+                        $gtSm={{
+                            alignSelf: 'center',
+                            width: '48%',
+                            borderWidth: '$0.5',
+                            borderColor: '$green6',
+                            borderRadius: '$4',
+                            padding: '$4',
+                            backgroundColor: '$green1',
+                        }}
+                    >
                         <H6>Add New List</H6>
                         <Separator />
                         <SizableText>Please enter the name and choose the store</SizableText>
                         <XStack alignItems="center">
-                            <Label size="$1" htmlFor="name" flex={1}>
+                            <Label size="$1" htmlFor="name" width="$4" flex={1}>
                                 List Name
                             </Label>
                             <Input
@@ -55,9 +71,7 @@ function AddListForm({ setOpenForm }: Props) {
                                 onChangeText={(name) => setFieldValue('list_name', name)}
                             />
                         </XStack>
-                        <XStack>
-                            <StoreSelector />
-                        </XStack>
+                        <StoreSelector />
                         <XStack gap="$4" justifyContent="flex-end">
                             <Button
                                 minWidth={100}
@@ -66,6 +80,7 @@ function AddListForm({ setOpenForm }: Props) {
                                 size="$3"
                                 onPress={() => {
                                     handleClosePress();
+                                    resetForm();
                                 }}
                             >
                                 Close
@@ -82,17 +97,7 @@ function AddListForm({ setOpenForm }: Props) {
                                 Submit
                             </Button>
                         </XStack>
-                        <YStack marginTop="$3">
-                            {(Object.keys(errors) as (keyof FormikErrors<ListCreationType>)[]).map(
-                                (field: keyof FormikErrors<ListCreationType>) => (
-                                    <SizableText key={field} size="$3" color="$red10">
-                                        {typeof errors[field] === 'string'
-                                            ? (errors[field] as string)
-                                            : JSON.stringify(errors?.[field])}
-                                    </SizableText>
-                                ),
-                            )}
-                        </YStack>
+                        <FormErrorText errors={errors} />
                     </YStack>
                 </BottomSheetView>
             )}

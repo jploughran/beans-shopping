@@ -190,19 +190,7 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                                 Submit
                             </Button>
                         </XStack>
-                        <YStack marginTop="$3">
-                            {(
-                                Object.keys(
-                                    errors,
-                                ) as (keyof FormikErrors<InitialListItemFormValue>)[]
-                            ).map((field: keyof FormikErrors<InitialListItemFormValue>) => (
-                                <SizableText key={field} size="$3" color="$red10">
-                                    {typeof errors[field] === 'string'
-                                        ? (errors[field] as string)
-                                        : JSON.stringify(errors?.[field])}
-                                </SizableText>
-                            ))}
-                        </YStack>
+                        <FormErrorText errors={errors} />
                     </YStack>
                 </BottomSheetView>
             )}
