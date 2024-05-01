@@ -8,14 +8,13 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TamaguiProvider, Theme } from 'tamagui';
 
 import { tamaguiConfig } from '../tamagui.config';
 
-// import { UserProvider } from '@/context-providers/UserProvider';
 import { SafeToastViewport } from '@/components/SafeToastViewport';
 import { UserProvider } from '@/context-providers/UserProvider';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -91,15 +90,3 @@ const LightTheme: NavTheme = {
         notification: 'rgb(255, 59, 48)',
     },
 };
-
-// const DarkTheme: NavTheme = {
-//     dark: true,
-//     colors: {
-//         primary: 'rgb(85, 180, 103)',
-//         background: 'rgb(22, 48, 29)',
-//         card: 'rgb(29, 68, 39)',
-//         text: 'rgb(251, 254, 251)',
-//         border: 'rgb(101, 186, 117)',
-//         notification: 'rgb(255, 59, 48)',
-//     },
-// };

@@ -8,7 +8,6 @@ import { useUserProviderContext } from '@/context-providers/UserProvider';
 
 export default function AppLayout() {
     const { session } = useUserProviderContext();
-
     if (!session) {
         return <Redirect href="/sign-in" />;
     }
@@ -28,7 +27,7 @@ export default function AppLayout() {
                             }}
                         />
                         <Stack.Screen
-                            name="Settings"
+                            name="modal"
                             options={{
                                 headerBackVisible: true,
                                 headerBackTitleVisible: false,

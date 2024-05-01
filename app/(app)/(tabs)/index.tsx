@@ -3,6 +3,7 @@ import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { ListPlus } from '@tamagui/lucide-icons';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
+import { Keyboard } from 'react-native';
 import { Button, ListItem, YStack } from 'tamagui';
 
 import AddListForm from '@/components/AddListForm';
@@ -43,17 +44,41 @@ export default function TabOneScreen() {
     );
 
     return (
-        <YStack margin="$4" flex={1}>
+        <YStack
+            margin="$4"
+            flex={1}
+            $gtSm={{
+                alignSelf: 'center',
+                width: '50%',
+                minHeight: 50,
+            }}
+        >
             <FlashList
                 keyExtractor={keyExtractor}
                 data={lists}
                 renderItem={renderSingleRow}
                 estimatedItemSize={200}
             />
-            <Button icon={ListPlus} size="$4" onPress={() => handleOpenPress()}>
+            <Button
+                icon={ListPlus}
+                size="$4"
+                onPress={() => {
+                    handleOpenPress();
+                }}
+            >
                 Add List
             </Button>
-            <BottomSheet ref={sheetRef} index={-1} snapPoints={['75%']} enablePanDownToClose>
+            <BottomSheet
+                ref={sheetRef}
+                index={-1}
+                snapPoints={['65%', '98%']}
+                enablePanDownToClose
+                keyboardBlurBehavior="restore"
+                keyboardBehavior="extend"
+                onClose={() => {
+                    Keyboard.dismiss();
+                }}
+            >
                 <AddListForm />
             </BottomSheet>
         </YStack>

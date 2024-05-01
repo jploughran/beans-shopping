@@ -14,6 +14,7 @@ import {
 } from '@/modules/add-list-item-validation';
 import { addListItem } from '@/modules/supabase-list-utils';
 import { Keyboard } from 'react-native';
+import FormErrorText from './FormErrorText';
 
 interface Props {
     // setOpenForm: () => void;
@@ -74,11 +75,25 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
             validateOnMount
             enableReinitialize
         >
-            {({ values, errors, dirty, setFieldValue, handleSubmit, isValid }) => (
+            {({ values, errors, setFieldValue, handleSubmit, isValid }) => (
                 <BottomSheetView style={{ flex: 1 }}>
-                    <YStack gap="$3" flex={1} padding="$1" marginTop="$2">
+                    <YStack
+                        gap="$3"
+                        flex={1}
+                        padding="$1"
+                        marginTop="$2"
+                        $gtSm={{
+                            alignSelf: 'center',
+                            width: '48%',
+                            borderWidth: '$0.5',
+                            borderColor: '$green6',
+                            borderRadius: '$4',
+                            padding: '$4',
+                            backgroundColor: '$green1',
+                        }}
+                    >
                         <XStack gap="$3" width="100%" alignItems="center">
-                            <Label size="$2" htmlFor="name" flex={1}>
+                            <Label size="$2" width="$4" htmlFor="name" flex={1}>
                                 Name
                             </Label>
                             <Input
@@ -100,13 +115,8 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                             />
                         </XStack>
                         <StoreItemsList />
-                        <XStack
-                            gap="$2"
-                            width="100%"
-                            alignItems="center"
-                            justifyContent="flex-start"
-                        >
-                            <Label size="$2" htmlFor="name" flex={1}>
+                        <XStack width="100%" alignItems="center" justifyContent="flex-start">
+                            <Label size="$2" width="$4" htmlFor="name" flex={1}>
                                 Price Type
                             </Label>
                             <ToggleGroup
@@ -128,7 +138,7 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                             </ToggleGroup>
                         </XStack>
                         <XStack gap="$3" width="100%" alignItems="center">
-                            <Label size="$2" htmlFor="name" flex={1}>
+                            <Label size="$2" width="$4" htmlFor="name" flex={1}>
                                 Quantity
                             </Label>
                             <Input
@@ -147,7 +157,7 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                             />
                         </XStack>
                         <XStack gap="$3" width="100%" alignItems="center">
-                            <Label size="$1" htmlFor="name" flex={1}>
+                            <Label size="$1" width="$4" htmlFor="name" flex={1}>
                                 Price/item
                             </Label>
                             <Input

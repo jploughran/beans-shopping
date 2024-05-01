@@ -1,15 +1,15 @@
-import { BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetView, useBottomSheetInternal } from '@gorhom/bottom-sheet';
 import { Formik, FormikErrors } from 'formik';
 import { memo } from 'react';
 import { Button, H6, Input, Label, Separator, SizableText, XStack, YStack } from 'tamagui';
 
+import FormErrorText from './FormErrorText';
 import StoreSelector from './StoreSelector';
 
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { newListValidationSchema } from '@/modules/add-list-item-validation';
 import { RowType } from '@/types/supabase-types';
-import FormErrorText from './FormErrorText';
 
 export type ListCreationType = Omit<
     RowType<'lists'>,
@@ -29,6 +29,7 @@ interface Props {
 function AddListForm({ setOpenForm }: Props) {
     const { handleAddList } = useListsProviderContext();
     const { handleClosePress } = useBottomSheetProviderContext();
+    const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
 
     return (
         <Formik
@@ -69,6 +70,12 @@ function AddListForm({ setOpenForm }: Props) {
                                 placeholder="Enter name here..."
                                 value={values.list_name}
                                 onChangeText={(name) => setFieldValue('list_name', name)}
+                                onFocus={() => {
+                                    shouldHandleKeyboardEvents.value = true;
+                                }}
+                                onBlur={() => {
+                                    shouldHandleKeyboardEvents.value = false;
+                                }}
                             />
                         </XStack>
                         <StoreSelector />

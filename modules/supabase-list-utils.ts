@@ -78,12 +78,19 @@ export async function handleUpdateSupabaseRow<T extends ExistingTables>(
     dataId: string | number,
     tableToUpdate: T,
 ) {
+    console.log({ data, idKey, dataId, tableToUpdate });
     return supabase
         .from(tableToUpdate)
         .update({ ...data })
         .eq(idKey.toString(), dataId)
         .select()
-        .then(({ data, error }) => (error ? Promise.reject(error) : Promise.resolve(data[0])));
+        .then(({ data, error }) => {
+            if (error) {
+                return Promise.reject(error);
+            } else {
+                return Promise.resolve(data[0]);
+            }
+        });
 }
 
 export const getStores = async () => {
@@ -149,7 +156,6 @@ export const updateListItem = async (itemData: ListItemWithData) => {
                 LIST_ITEMS,
             )
                 .then((listItem) => {
-                    console.log('updateListItem returns', { ...itemAddedToStore, ...listItem });
                     return Promise.resolve({
                         ...itemAddedToStore,
                         ...listItem,
@@ -157,5 +163,7 @@ export const updateListItem = async (itemData: ListItemWithData) => {
                 })
                 .catch((e) => Promise.reject(e));
         })
-        .catch((e) => Promise.reject(e));
+        .catch((e) => {
+            return Promise.reject(e);
+        });
 };

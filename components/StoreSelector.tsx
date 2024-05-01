@@ -1,3 +1,4 @@
+import { useBottomSheetInternal } from '@gorhom/bottom-sheet';
 import { Check, Store as StoreIcon } from '@tamagui/lucide-icons';
 import { useField } from 'formik';
 import Fuse, { IFuseOptions } from 'fuse.js';
@@ -16,6 +17,7 @@ const fuseOptions: IFuseOptions<Store> = {
 const StoreSelector = () => {
     const [stores, setStores] = useState<Store[]>([]);
     const [name, setName] = useState('');
+    const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
 
     useEffect(() => {
         const fetchStores = async () => {
@@ -26,9 +28,9 @@ const StoreSelector = () => {
 
     const fuseList = useMemo(() => new Fuse(stores, fuseOptions), [stores]);
     return (
-        <YStack flex={1}>
-            <XStack gap="$3" width="100%" alignItems="center">
-                <Label size="$3" htmlFor="name" flex={1}>
+        <YStack>
+            <XStack alignItems="center">
+                <Label size="$1" htmlFor="store" flex={1} width="$4">
                     Store
                 </Label>
                 <Input
@@ -38,6 +40,12 @@ const StoreSelector = () => {
                     value={name}
                     onChangeText={(name) => setName(name)}
                     clearButtonMode="always"
+                    onFocus={() => {
+                        shouldHandleKeyboardEvents.value = true;
+                    }}
+                    onBlur={() => {
+                        shouldHandleKeyboardEvents.value = false;
+                    }}
                 />
             </XStack>
             <XStack marginTop="$4">

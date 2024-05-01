@@ -9,9 +9,9 @@ const EditListTopTabName = () => {
     const { selectedList } = useListsProviderContext();
     return (
         <XStack gap="$4" alignItems="center">
-            {Platform.OS === 'ios' ? null : (
+            {Platform.OS === 'android' ? (
                 <Button icon={ArrowBigLeft} chromeless onPress={() => router.back()} />
-            )}
+            ) : null}
             <SizableText size="$6">{selectedList?.list_name ?? 'Edit List'}</SizableText>
         </XStack>
     );

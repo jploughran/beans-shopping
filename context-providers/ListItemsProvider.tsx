@@ -27,6 +27,7 @@ export interface ListItemsProviderContextValues {
     itemsWithCost: ListItemWithData[];
     setItemsWithCost: Dispatch<SetStateAction<ListItemWithData[]>>;
     handleUpdateListItem: (itemToUpdate: ListItemWithData) => Promise<void>;
+    listItemsLoading: boolean;
 }
 
 export const ListItemsProviderContext = createContext<ListItemsProviderContextValues | null>(null);
@@ -37,12 +38,14 @@ export const ListItemsProvider = ({
     children?: React.ReactNode;
 }) => {
     const [itemsWithCost, setItemsWithCost] = useState<ListItemWithData[]>([]);
+    const [listItemsLoading, setListItemsLoading] = useState(true);
     const list = useSelectedList();
     const [allStoreItemsWithCost, setAllStoreItemsWithCost] = useState<ListItemWithData[]>([]);
 
     useEffect(() => {
         if (list?.list_id && list.store_id) {
             const getListItems = async () => {
+                setListItemsLoading(true);
                 await Promise.all([
                     getListItemsWithData(list.list_id)
                         .then((listItems) => setItemsWithCost(listItems))
@@ -50,7 +53,7 @@ export const ListItemsProvider = ({
                     getListItemsForStore(list.store_id)
                         .then((listItems) => setAllStoreItemsWithCost(listItems))
                         .catch((e) => console.error(e)),
-                ]);
+                ]).finally(() => setListItemsLoading(false));
             };
             getListItems();
         }
@@ -92,8 +95,15 @@ export const ListItemsProvider = ({
             setItemsWithCost,
             handleRemoveListItem,
             handleUpdateListItem,
+            listItemsLoading,
         };
-    }, [allStoreItemsWithCost, handleRemoveListItem, handleUpdateListItem, itemsWithCost]);
+    }, [
+        allStoreItemsWithCost,
+        handleRemoveListItem,
+        handleUpdateListItem,
+        itemsWithCost,
+        listItemsLoading,
+    ]);
 
     return (
         <ListItemsProviderContext.Provider value={contextValue}>
