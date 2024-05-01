@@ -1,15 +1,16 @@
-import { initialSignUpValues, newUserValidationSchema } from '@/modules/authenticate';
+import { router } from 'expo-router';
 import { Formik } from 'formik';
 import { memo, useState } from 'react';
+import { Alert, StyleSheet } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { YStack, Spinner, SizableText, View, H3, Image } from 'tamagui';
 // import { useUserProviderContext } from '@/context-providers/UserProvider';
-import { router } from 'expo-router';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Alert, StyleSheet } from 'react-native';
+
+import logo from '@/assets/images/BeanLogo.png';
 import FormField from '@/components/FormField';
 import SubmitButton from '@/components/SubmitButton';
+import { initialSignUpValues, newUserValidationSchema } from '@/modules/authenticate';
 import { supabase } from '@/modules/supabase';
-import logo from '@/assets/images/BeanLogo.png';
 
 const SignUp = () => {
     // const { setUser } = useUserProviderContext();
@@ -17,7 +18,7 @@ const SignUp = () => {
 
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
-            <View backgroundColor={'$green3'} style={styles.container}>
+            <View backgroundColor="$green3" style={styles.container}>
                 <H3 marginBottom="$5">Bean Shopping</H3>
                 <Image
                     src={logo}
@@ -35,8 +36,8 @@ const SignUp = () => {
                             data: { session },
                             error,
                         } = await supabase.auth.signUp({
-                            email: email,
-                            password: password,
+                            email,
+                            password,
                         });
 
                         if (error) Alert.alert(error.message);

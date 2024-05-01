@@ -15,6 +15,7 @@ import { tamaguiConfig } from '../tamagui.config';
 // import { UserProvider } from '@/context-providers/UserProvider';
 import { SafeToastViewport } from '@/components/SafeToastViewport';
 import { UserProvider } from '@/context-providers/UserProvider';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -59,18 +60,23 @@ function RootLayoutNav() {
     const colorScheme = useColorScheme();
 
     return (
-        <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme as string | undefined}>
-            <ThemeProvider value={LightTheme}>
-                <Theme name="green">
-                    <UserProvider>
-                        <ToastProvider>
-                            <Slot />
-                            <SafeToastViewport />
-                        </ToastProvider>
-                    </UserProvider>
-                </Theme>
-            </ThemeProvider>
-        </TamaguiProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <TamaguiProvider
+                config={tamaguiConfig}
+                defaultTheme={colorScheme as string | undefined}
+            >
+                <ThemeProvider value={LightTheme}>
+                    <Theme name="green">
+                        <UserProvider>
+                            <ToastProvider>
+                                <Slot />
+                                <SafeToastViewport />
+                            </ToastProvider>
+                        </UserProvider>
+                    </Theme>
+                </ThemeProvider>
+            </TamaguiProvider>
+        </GestureHandlerRootView>
     );
 }
 

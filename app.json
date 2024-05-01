@@ -1,16 +1,43 @@
 {
-  "expo": {
-    "extra": {
-      "eas": {
-        "projectId": "0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
-      }
-    },
-    "scheme": "beanshopper",
-    "android": {
-      "package": "com.synergetx.beansshopping"
-    },
-    "ios": {
-      "bundleIdentifier": "com.synergetx.beansshopping"
+    "expo": {
+        "name": "Bean Shopping",
+        "slug": "beans-shopping",
+        "extra": {
+            "eas": {
+                "projectId": "0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
+            }
+        },
+        "scheme": "beanshopper",
+        "android": {
+            "package": "com.synergetx.beansshopping",
+            "versionCode": 3,
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/images/BeanLogo.png",
+                "backgroundColor": "#e9f9ee"
+            },
+            "backgroundColor": "#e9f9ee"
+        },
+        "ios": {
+            "bundleIdentifier": "com.synergetx.beansshopping",
+            "backgroundColor": "#e9f9ee",
+            "splash": {
+                "backgroundColor": "#e9f9ee",
+                "image": "./assets/images/BeanLogo.png",
+                "resizeMode": "contain",
+                "tabletImage": "./assets/images/BeanLogo.png"
+            }
+        },
+        "icon": "./assets/images/BeanLogo.png",
+        "splash": {
+            "image": "./assets/images/BeanLogo.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#e9f9ee"
+        },
+        "runtimeVersion": {
+            "policy": "appVersion"
+        },
+        "updates": {
+            "url": "https://u.expo.dev/0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
+        }
     }
-  }
 }
