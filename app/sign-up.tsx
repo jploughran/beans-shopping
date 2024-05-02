@@ -38,12 +38,14 @@ const SignUp = () => {
                         } = await supabase.auth.signUp({
                             email,
                             password,
+                            options: {
+                                emailRedirectTo: 'https://beans-shopping.vercel.app/emailConfirmed',
+                            },
                         });
 
                         if (error) Alert.alert(error.message);
                         if (!session) {
                             Alert.alert('Please check your inbox for email verification!');
-                            router.back();
                         }
                         setLoading(false);
                     }}
