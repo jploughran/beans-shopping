@@ -41,8 +41,10 @@ const SignUp = () => {
                         });
 
                         if (error) Alert.alert(error.message);
-                        if (!session)
+                        if (!session) {
                             Alert.alert('Please check your inbox for email verification!');
+                            router.back();
+                        }
                         setLoading(false);
                     }}
                     validateOnChange

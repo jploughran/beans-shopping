@@ -34,14 +34,14 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="two"
+                name="recipes"
                 options={{
                     title: 'Recipes',
                     tabBarIcon: ({ color }) => <Salad color={color} />,
                 }}
             />
             <Tabs.Screen
-                name="three"
+                name="previousTrips"
                 options={{
                     title: 'Previous Trips',
                     tabBarIcon: ({ color }) => <Receipt color={color} />,
