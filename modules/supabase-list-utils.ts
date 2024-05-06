@@ -102,21 +102,23 @@ export const getStores = async () => {
         });
 };
 
-export const getListItemsWithData = async (listId: number) => {
+export const getListItemsWithData = async (listId: number, user_id: string) => {
     return supabase
         .from('list_items_with_store_data')
         .select(`*`)
         .eq('list_id', listId)
+        .eq('user_id', user_id)
         .then(({ data, error }) => {
             return data ? Promise.resolve(data as ListItemWithData[]) : Promise.reject(error);
         });
 };
 
-export const getListItemsForStore = async (storeId: number) => {
+export const getListItemsForStore = async (storeId: number, user_id: string) => {
     return supabase
         .from('list_items_with_store_data')
         .select(`*`)
         .eq('store_id', storeId)
+        .eq('user_id', user_id)
         .then(({ data, error }) => {
             return data ? Promise.resolve(data as ListItemWithData[]) : Promise.reject(error);
         });

@@ -22,14 +22,13 @@ const StoreItemsList = () => {
         [allStoreItemsWithCost],
     );
 
-    console.log({ fuseList });
     return itemName ? (
         <XStack>
             <ScrollView horizontal flexDirection="row">
                 <XStack gap="$2">
-                    {fuseList.search(itemName).map(({ item }) => {
+                    {fuseList.search(itemName).map(({ item }, i) => {
                         console.log({ item });
-                        return <StoreItem item={item} />;
+                        return <StoreItem item={item} key={item.created_at} />;
                     })}
                 </XStack>
             </ScrollView>

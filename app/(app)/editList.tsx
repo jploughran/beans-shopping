@@ -46,8 +46,8 @@ const EditList = () => {
             const valuesToSubmit = {
                 ...formValues,
                 description: '',
-                price: parseFloat(formValues.price),
-                quantity: parseFloat(formValues.quantity),
+                price: parseFloat(formValues.price ?? '0'),
+                quantity: parseFloat(formValues.quantity ?? '0'),
             } as ListItemWithData;
             console.log(`handleSubmit called`, { valuesToSubmit });
             await handleUpdateListItem(valuesToSubmit);

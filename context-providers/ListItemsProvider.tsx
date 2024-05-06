@@ -45,12 +45,13 @@ export const ListItemsProvider = ({
     useEffect(() => {
         if (list?.list_id && list.store_id) {
             const getListItems = async () => {
+                const { list_id, user_id, store_id } = list;
                 setListItemsLoading(true);
                 await Promise.all([
-                    getListItemsWithData(list.list_id)
+                    getListItemsWithData(list_id, user_id)
                         .then((listItems) => setItemsWithCost(listItems))
                         .catch((e) => console.error(e)),
-                    getListItemsForStore(list.store_id)
+                    getListItemsForStore(store_id, user_id)
                         .then((listItems) => setAllStoreItemsWithCost(listItems))
                         .catch((e) => console.error(e)),
                 ]).finally(() => setListItemsLoading(false));
@@ -61,7 +62,7 @@ export const ListItemsProvider = ({
         return () => {
             supabase.removeAllChannels();
         };
-    }, [list?.list_id, list?.store_id]);
+    }, [list]);
 
     const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
         await updateListItem(itemToUpdate)
