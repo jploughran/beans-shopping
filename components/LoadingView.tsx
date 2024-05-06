@@ -1,22 +1,25 @@
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { StyleProp, ViewStyle } from 'react-native';
+import Animated, { AnimatedStyle, FadeIn, FadeOut } from 'react-native-reanimated';
 import { SizableText, Spinner } from 'tamagui';
 
 interface Props {
     loading: boolean;
     children: JSX.Element;
     message?: string;
+    style?: StyleProp<AnimatedStyle<StyleProp<ViewStyle>>>;
 }
-export default function LoadingView({ children, loading, message = 'Loading...' }: Props) {
+export default function LoadingView({ children, loading, message = 'Loading...', style }: Props) {
     if (loading) {
         return (
             <Animated.View
-                style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100%',
-                }}
+                style={[
+                    {
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    },
+                    style,
+                ]}
                 entering={FadeIn.duration(200)}
                 exiting={FadeOut.duration(200)}
             >
