@@ -1,6 +1,6 @@
 import BottomSheet, { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { ListPlus } from '@tamagui/lucide-icons';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, H3, H5, ScrollView, Separator, SizableText, View, XStack, YStack } from 'tamagui';
 
@@ -12,30 +12,37 @@ import { useListItemsProviderContext } from '@/context-providers/ListItemsProvid
 import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import { ListItemWithData } from '@/types/list';
 
-const getCostForItems = (itemsWithCost: ListItemWithData[]) =>
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+
+const getCostForItems = (itemsWithCost?: ListItemWithData[]) =>
     itemsWithCost
-        .reduce((totalCost, currentItem) => {
-            if (currentItem?.price && currentItem?.quantity) {
-                totalCost = totalCost + currentItem?.price * currentItem?.quantity;
-            }
-            return totalCost;
-        }, 0)
-        .toFixed(2);
+        ? itemsWithCost
+              .reduce((totalCost, currentItem) => {
+                  if (currentItem?.price && currentItem?.quantity) {
+                      totalCost = totalCost + currentItem?.price * currentItem?.quantity;
+                  }
+                  return totalCost;
+              }, 0)
+              .toFixed(2)
+        : 'Loading...';
 
 const EditList = () => {
     const { itemsWithCost, handleUpdateListItem, listItemsLoading } = useListItemsProviderContext();
 
     const { handleOpenPress, sheetRef } = useBottomSheetProviderContext();
     const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
+    const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
+    const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
-    const unCheckedItems = useMemo(
-        () => itemsWithCost.filter(({ completed }) => !completed),
+    useEffect(
+        () => setUncheckedItems(itemsWithCost.filter(({ completed }) => !completed)),
         [itemsWithCost],
     );
-    const checkedItems = useMemo(
-        () => itemsWithCost.filter(({ completed }) => completed),
+    useEffect(
+        () => setCheckedItems(itemsWithCost.filter(({ completed }) => completed)),
         [itemsWithCost],
     );
+
     const estimatedTotal = useMemo(() => getCostForItems(itemsWithCost), [itemsWithCost]);
 
     const checkedTotal = useMemo(() => getCostForItems(checkedItems), [checkedItems]);
@@ -87,40 +94,37 @@ const EditList = () => {
                     </YStack>
                 </XStack>
                 <Separator marginTop="$3" backgroundColor="$green10" />
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    $gtSm={{
-                        alignSelf: 'center',
-                        width: '50%',
-                    }}
-                >
-                    <H3 marginVertical="$3">Remaining Items</H3>
-                    {unCheckedItems.map((item) => (
-                        <StoreListItem
-                            key={item.list_item_id + item.item_name}
-                            item={item}
-                            setItemToEdit={setItemToEdit}
-                        />
-                    ))}
 
-                    <Button
-                        icon={ListPlus}
-                        marginTop="$4"
-                        onPress={() => {
-                            setItemToEdit(undefined);
-                            handleOpenPress();
-                        }}
-                    />
-                    <Separator />
-                    <H3 marginVertical="$3">Checked Items</H3>
-                    {checkedItems.map((item) => (
-                        <StoreListItem
-                            key={item.list_item_id + item.item_name}
-                            item={item}
-                            setItemToEdit={setItemToEdit}
-                        />
-                    ))}
-                </ScrollView>
+                <H3 marginVertical="$3">Remaining Items</H3>
+
+                <DraggableFlatList
+                    data={unCheckedItems ?? []}
+                    onDragEnd={({ data }) => setUncheckedItems(data)}
+                    keyExtractor={(item, i) => item.list_item_id + item.item_name}
+                    renderItem={(props) => (
+                        <StoreListItem {...props} setItemToEdit={setItemToEdit} />
+                    )}
+                />
+
+                <Button
+                    icon={ListPlus}
+                    marginTop="$4"
+                    onPress={() => {
+                        setItemToEdit(undefined);
+                        handleOpenPress();
+                    }}
+                />
+                <Separator />
+                <H3 marginVertical="$3">Checked Items</H3>
+
+                <DraggableFlatList
+                    data={checkedItems ?? []}
+                    onDragEnd={({ data }) => setUncheckedItems(data)}
+                    keyExtractor={(item, i) => item.list_item_id + item.item_name}
+                    renderItem={(props) => (
+                        <StoreListItem {...props} setItemToEdit={setItemToEdit} />
+                    )}
+                />
                 <BottomSheet
                     ref={sheetRef}
                     index={-1}
