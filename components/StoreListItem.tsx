@@ -40,14 +40,31 @@ const StoreListItem = ({ item, setItemToEdit }: Props) => {
         [handleOpenPress, handleUpdateListItem, item, setItemToEdit],
     );
 
+    const handleLongPress = useCallback(() => {
+        setItemToEdit({
+            ...item,
+            price: item.price?.toString() ?? '',
+            quantity: item.quantity?.toString() ?? '',
+        });
+        handleOpenPress();
+    }, [handleOpenPress, item, setItemToEdit]);
+
     return (
         <Swipeable
             leftThreshold={20}
             renderRightActions={() => <DeleteButton itemId={item.list_item_id} />}
             containerStyle={{ alignContent: 'center', flex: 1, justifyContent: 'center' }}
         >
-            <ListItem borderRadius="$4" marginTop="$2" paddingHorizontal="$4" paddingVertical="$1">
-                <XStack alignItems="center" gap="$4" justifyContent="space-between" width="100%">
+            <ListItem borderRadius="$4" marginTop="$2" paddingVertical="$1" paddingHorizontal="$0">
+                <XStack
+                    alignItems="center"
+                    gap="$4"
+                    justifyContent="space-between"
+                    width="100%"
+                    onLongPress={handleLongPress}
+                    pressStyle={{ backgroundColor: '$green4' }}
+                    paddingHorizontal="$4"
+                >
                     <Checkbox
                         size="$4"
                         checked={item.completed}
@@ -57,18 +74,7 @@ const StoreListItem = ({ item, setItemToEdit }: Props) => {
                             <Check />
                         </Checkbox.Indicator>
                     </Checkbox>
-                    <Label
-                        onPressIn={() => {
-                            setItemToEdit({
-                                ...item,
-                                price: item.price?.toString() ?? '',
-                                quantity: item.quantity?.toString() ?? '',
-                            });
-                            handleOpenPress();
-                        }}
-                    >
-                        {item.item_name}
-                    </Label>
+                    <Label onLongPress={handleLongPress}>{item.item_name}</Label>
                     <Label>
                         {item.price && item.quantity
                             ? `$${(item?.price * item?.quantity).toFixed(2)}`
