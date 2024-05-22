@@ -67,16 +67,18 @@ export const ListItemsProvider = ({
     const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
         await updateListItem(itemToUpdate)
             .then((updatedItem) => {
-                setItemsWithCost((prev) =>
-                    prev.reduce((itemsToReturn, currentItem) => {
+                setItemsWithCost((prev) => {
+                    const newData = prev.reduce((itemsToReturn, currentItem) => {
                         if (currentItem.list_item_id === updatedItem.list_item_id) {
                             itemsToReturn.push(updatedItem);
                         } else {
                             itemsToReturn.push(currentItem);
                         }
                         return itemsToReturn;
-                    }, [] as ListItemWithData[]),
-                );
+                    }, [] as ListItemWithData[]);
+                    console.log({ newData });
+                    return [...newData];
+                });
             })
             .catch((e) => console.log('Error in [handleUpdateListItem]', { e }));
     }, []);

@@ -1,4 +1,4 @@
-import { RowType } from './supabase-types';
+import { RowType } from './supabase';
 
 export interface List {
     completed: boolean;
@@ -11,26 +11,10 @@ export interface List {
 }
 
 export interface Store extends RowType<'stores'> {}
+export interface StoreItem extends RowType<'items'> {}
+export interface ListItem extends RowType<'list_items'> {}
 
-export interface ListItemWithData extends ListItem, StoreItem {}
-
-export interface ListItem {
-    completed: boolean;
-    created_at: string | null;
-    item_id: number;
-    list_item_id: number;
-    list_id: number;
-    quantity?: number;
-    user_id: string;
-}
-
-export interface StoreItem {
-    created_at: string | null;
-    item_id: number;
-    item_name: string;
-    price?: number;
-    price_type?: 'count' | 'weight';
-    store_id: number;
+export interface ListItemWithData extends ListItem, StoreItem {
     user_id: string;
 }
 
@@ -40,11 +24,6 @@ export interface Recipe {
     estimatedCost?: number;
     name: string;
     userId: string;
-}
-
-export enum PriceType {
-    WEIGHT = 1,
-    COUNT = 2,
 }
 
 export const LISTS = 'lists';

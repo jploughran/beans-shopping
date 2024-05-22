@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Button, Input, Label, SizableText, ToggleGroup, XStack, YStack } from 'tamagui';
 
 import FormErrorText from './FormErrorText';
+import LoadingView from './LoadingView';
 import StoreItemsList from './StoreItemsList';
 
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
@@ -14,7 +15,6 @@ import {
     newListItemValidationSchema,
 } from '@/modules/add-list-item-validation';
 import { addListItem } from '@/modules/supabase-list-utils';
-import LoadingView from './LoadingView';
 
 interface Props {
     // setOpenForm: () => void;
@@ -24,7 +24,7 @@ interface Props {
 
 export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
     const { selectedList } = useListsProviderContext();
-    const { setItemsWithCost } = useListItemsProviderContext();
+    const { setItemsWithCost, itemsWithCost } = useListItemsProviderContext();
     const { handleClosePress } = useBottomSheetProviderContext();
     const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
     const [loading, setLoading] = useState(false);
@@ -44,8 +44,15 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                       price_type: 'count',
                       store_id: selectedList?.store_id ?? 0,
                       user_id: selectedList?.user_id ?? '',
+                      list_order: itemsWithCost.length,
                   },
-        [itemToEdit, selectedList?.list_id, selectedList?.store_id, selectedList?.user_id],
+        [
+            itemToEdit,
+            itemsWithCost.length,
+            selectedList?.list_id,
+            selectedList?.store_id,
+            selectedList?.user_id,
+        ],
     );
     const handleFormSubmission = useCallback(
         async (formValues: InitialListItemFormValue) => {
@@ -55,7 +62,9 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
             } else {
                 await addListItem(formValues)
                     .then((item) => {
-                        setItemsWithCost((prev) => prev.concat([item]));
+                        setItemsWithCost((prev) =>
+                            prev.concat([{ ...item, list_order: prev.length }]),
+                        );
                     })
                     .catch((e) => console.log(e));
             }
@@ -63,8 +72,6 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
         },
         [handleClosePress, handleFormSubmit, setItemsWithCost],
     );
-
-    console.log({ initialValues });
 
     return (
         <Formik

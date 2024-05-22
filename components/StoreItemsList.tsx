@@ -27,7 +27,6 @@ const StoreItemsList = () => {
             <ScrollView horizontal flexDirection="row">
                 <XStack gap="$2">
                     {fuseList.search(itemName).map(({ item }, i) => {
-                        console.log({ item });
                         return <StoreItem item={item} key={item.created_at} />;
                     })}
                 </XStack>
@@ -39,7 +38,7 @@ const StoreItemsList = () => {
 export default memo(StoreItemsList);
 
 const StoreItem = ({ item }: { item: ListItemWithData }) => {
-    const { setValues, handleSubmit, values } = useFormikContext<InitialListItemFormValue>();
+    const { setValues, values } = useFormikContext<InitialListItemFormValue>();
 
     const isChosen = useMemo(() => values.item_id === item.item_id, [item.item_id, values.item_id]);
 
@@ -57,9 +56,9 @@ const StoreItem = ({ item }: { item: ListItemWithData }) => {
             onPress={() => {
                 setValues({
                     ...item,
-                    quantity: item.quantity?.toString() ?? '0',
+                    quantity: '1',
                     price: item.price?.toString() ?? '0',
-                }).then(() => handleSubmit());
+                });
             }}
         />
     );

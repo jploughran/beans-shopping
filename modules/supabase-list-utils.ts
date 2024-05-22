@@ -2,7 +2,7 @@ import { InitialListItemFormValue } from './add-list-item-validation';
 import { supabase } from './supabase';
 
 import { ITEMS, LISTS, LIST_ITEMS, List, ListItemWithData, Store } from '@/types/list';
-import { Database, ExistingTables, InsertType } from '@/types/supabase-types';
+import { Database, ExistingTables, InsertType } from '@/types/supabase';
 
 export const addListToTable = async (storeId: number, listName: string) => {
     const { data, error } = await supabase
@@ -20,9 +20,26 @@ export const addListToTable = async (storeId: number, listName: string) => {
 export const addListItem = async (
     itemData: InitialListItemFormValue,
 ): Promise<ListItemWithData> => {
-    const { store_id, item_name, price, price_type, list_id, quantity, user_id } = itemData;
+    const {
+        store_id,
+        item_name,
+        price,
+        price_type,
+        list_id,
+        quantity,
+        user_id,
+        item_id,
+        list_order,
+    } = itemData;
     return handleSupabaseInsertRow(
-        { store_id, item_name, price: parseFloat(price), price_type, user_id },
+        {
+            store_id,
+            item_name,
+            price: parseFloat(price),
+            price_type,
+            user_id,
+            item_id,
+        },
         ITEMS,
     )
         .then(async (itemAddedToStore) => {
@@ -32,6 +49,7 @@ export const addListItem = async (
                     item_id: itemAddedToStore.item_id,
                     quantity: parseFloat(quantity),
                     user_id,
+                    list_order,
                 },
                 LIST_ITEMS,
             )
@@ -49,7 +67,7 @@ export async function handleSupabaseInsertRow<T extends ExistingTables>(
 ) {
     const { data: data_1, error } = await supabase
         .from(tableToUpdate)
-        .insert([{ ...data }])
+        .upsert({ ...data })
         .select();
     if (data_1?.[0]) {
         const itemAdded = data_1[0];
@@ -169,3 +187,16 @@ export const updateListItem = async (itemData: ListItemWithData) => {
             return Promise.reject(e);
         });
 };
+
+export async function handleSupabaseUpsert<T extends ExistingTables>(
+    data: Partial<InsertType<T>>[],
+    tableToUpdate: T,
+) {
+    return supabase
+        .from(tableToUpdate)
+        .upsert(data)
+        .select()
+        .then((e) => {
+            console.log('response [handleSupabaseUpsert]', { e, data: e.data });
+        });
+}

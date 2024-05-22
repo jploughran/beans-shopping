@@ -1,18 +1,11 @@
-import BottomSheet, { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
-import { ListPlus } from '@tamagui/lucide-icons';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Keyboard } from 'react-native';
-import { Button, H3, H5, ScrollView, Separator, SizableText, View, XStack, YStack } from 'tamagui';
+import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { H5, Separator, SizableText, XStack, YStack } from 'tamagui';
 
-import { AddListItemForm } from '@/components/AddListItemForm';
+import EditListTabs from '@/components/EditListTabs';
 import LoadingView from '@/components/LoadingView';
-import StoreListItem from '@/components/StoreListItem';
-import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
-import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import { ListItemWithData } from '@/types/list';
-
-import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 
 const getCostForItems = (itemsWithCost?: ListItemWithData[]) =>
     itemsWithCost
@@ -27,10 +20,8 @@ const getCostForItems = (itemsWithCost?: ListItemWithData[]) =>
         : 'Loading...';
 
 const EditList = () => {
-    const { itemsWithCost, handleUpdateListItem, listItemsLoading } = useListItemsProviderContext();
+    const { itemsWithCost, listItemsLoading } = useListItemsProviderContext();
 
-    const { handleOpenPress, sheetRef } = useBottomSheetProviderContext();
-    const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
     const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
@@ -47,20 +38,6 @@ const EditList = () => {
 
     const checkedTotal = useMemo(() => getCostForItems(checkedItems), [checkedItems]);
     const unCheckedTotal = useMemo(() => getCostForItems(unCheckedItems), [unCheckedItems]);
-
-    const handleSubmit = useCallback(
-        async (formValues: InitialListItemFormValue) => {
-            const valuesToSubmit = {
-                ...formValues,
-                description: '',
-                price: parseFloat(formValues.price ?? '0'),
-                quantity: parseFloat(formValues.quantity ?? '0'),
-            } as ListItemWithData;
-            console.log(`handleSubmit called`, { valuesToSubmit });
-            await handleUpdateListItem(valuesToSubmit);
-        },
-        [handleUpdateListItem],
-    );
 
     return (
         <LoadingView loading={listItemsLoading}>
@@ -94,53 +71,7 @@ const EditList = () => {
                     </YStack>
                 </XStack>
                 <Separator marginTop="$3" backgroundColor="$green10" />
-
-                <H3 marginVertical="$3">Remaining Items</H3>
-
-                <DraggableFlatList
-                    data={unCheckedItems ?? []}
-                    onDragEnd={({ data }) => setUncheckedItems(data)}
-                    keyExtractor={(item, i) => item.list_item_id + item.item_name}
-                    renderItem={(props) => (
-                        <StoreListItem {...props} setItemToEdit={setItemToEdit} />
-                    )}
-                />
-
-                <Button
-                    icon={ListPlus}
-                    marginTop="$4"
-                    onPress={() => {
-                        setItemToEdit(undefined);
-                        handleOpenPress();
-                    }}
-                />
-                <Separator />
-                <H3 marginVertical="$3">Checked Items</H3>
-
-                <DraggableFlatList
-                    data={checkedItems ?? []}
-                    onDragEnd={({ data }) => setUncheckedItems(data)}
-                    keyExtractor={(item, i) => item.list_item_id + item.item_name}
-                    renderItem={(props) => (
-                        <StoreListItem {...props} setItemToEdit={setItemToEdit} />
-                    )}
-                />
-                <BottomSheet
-                    ref={sheetRef}
-                    index={-1}
-                    snapPoints={['65%', '98%']}
-                    enablePanDownToClose
-                    keyboardBlurBehavior="restore"
-                    keyboardBehavior="extend"
-                    onClose={() => {
-                        Keyboard.dismiss();
-                    }}
-                >
-                    <AddListItemForm
-                        itemToEdit={itemToEdit}
-                        handleFormSubmit={itemToEdit ? handleSubmit : undefined}
-                    />
-                </BottomSheet>
+                <EditListTabs />
             </YStack>
         </LoadingView>
     );
