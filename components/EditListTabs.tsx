@@ -7,7 +7,6 @@ import DraggableFlatList, {
 import { Button, H5, Separator, SizableText, Tabs } from 'tamagui';
 
 import { AddListItemForm } from './AddListItemForm';
-import FormBottomSheet from './FormBottomSheet';
 import LoadingView from './LoadingView';
 import StoreListItem from './StoreListItem';
 
@@ -16,11 +15,13 @@ import { useListItemsProviderContext } from '@/context-providers/ListItemsProvid
 import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import { handleSupabaseUpsert } from '@/modules/supabase-list-utils';
 import { ListItemWithData } from '@/types/list';
+import BottomSheet from '@gorhom/bottom-sheet';
+import { Keyboard } from 'react-native';
 
 const EditListTabs = () => {
     const { itemsWithCost, handleUpdateListItem, setItemsWithCost } = useListItemsProviderContext();
 
-    const { handleOpenPress } = useBottomSheetProviderContext();
+    const { handleOpenPress, sheetRef } = useBottomSheetProviderContext();
     const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
     const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>(
         itemsWithCost
@@ -137,12 +138,22 @@ const EditListTabs = () => {
                     />
                 </LoadingView>
             </Tabs.Content>
-            <FormBottomSheet>
+            <BottomSheet
+                ref={sheetRef}
+                index={-1}
+                snapPoints={['65%', '98%']}
+                enablePanDownToClose
+                keyboardBlurBehavior="restore"
+                keyboardBehavior="extend"
+                onClose={() => {
+                    Keyboard.dismiss();
+                }}
+            >
                 <AddListItemForm
                     itemToEdit={itemToEdit}
                     handleFormSubmit={itemToEdit ? handleSubmit : undefined}
                 />
-            </FormBottomSheet>
+            </BottomSheet>
         </Tabs>
     );
 };
