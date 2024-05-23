@@ -4,14 +4,18 @@ import { Text, View } from '@/components/Themed';
 
 export default function TabTwoScreen() {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Coming soon...</Text>
-            <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+        <View style={initialScreenStyles.container}>
+            <Text style={initialScreenStyles.title}>Coming soon...</Text>
+            <View
+                style={initialScreenStyles.separator}
+                lightColor="#eee"
+                darkColor="rgba(255,255,255,0.1)"
+            />
         </View>
     );
 }
 
-const styles = StyleSheet.create({
+export const initialScreenStyles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
