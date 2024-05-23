@@ -1,9 +1,11 @@
-import { BottomSheetView, useBottomSheetInternal } from '@gorhom/bottom-sheet';
+import { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Formik } from 'formik';
 import { useCallback, useMemo, useState } from 'react';
-import { Button, Input, Label, SizableText, ToggleGroup, XStack, YStack } from 'tamagui';
+import { Button, SizableText, ToggleGroup, XStack, YStack } from 'tamagui';
 
 import FormErrorText from './FormErrorText';
+import InputField from './InputField';
+import InputLabel from './InputLabel';
 import LoadingView from './LoadingView';
 import StoreItemsList from './StoreItemsList';
 
@@ -26,7 +28,6 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
     const { selectedList } = useListsProviderContext();
     const { setItemsWithCost, itemsWithCost } = useListItemsProviderContext();
     const { handleClosePress } = useBottomSheetProviderContext();
-    const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
     const [loading, setLoading] = useState(false);
 
     const initialValues: InitialListItemFormValue = useMemo(
@@ -110,32 +111,21 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                             }}
                         >
                             <XStack gap="$3" width="100%" alignItems="center">
-                                <Label size="$2" width="$4" htmlFor="name" flex={1}>
-                                    Name
-                                </Label>
-                                <Input
-                                    size="$3"
-                                    flex={4}
+                                <InputLabel label="Name" />
+                                <InputField
+                                    fieldName="item_name"
                                     placeholder="Enter name here..."
-                                    value={values.item_name}
-                                    onChangeText={(name) => {
-                                        console.log({ values });
-                                        setFieldValue('item_name', name);
-                                    }}
-                                    onFocus={() => {
-                                        shouldHandleKeyboardEvents.value = true;
-                                    }}
-                                    onBlur={() => {
-                                        shouldHandleKeyboardEvents.value = false;
-                                    }}
-                                    clearButtonMode="always"
+                                    keyboardType="default"
                                 />
                             </XStack>
                             <StoreItemsList />
-                            <XStack width="100%" alignItems="center" justifyContent="flex-start">
-                                <Label size="$2" width="$4" htmlFor="name" flex={1}>
-                                    Price Type
-                                </Label>
+                            <XStack
+                                gap="$2.5"
+                                width="100%"
+                                alignItems="center"
+                                justifyContent="flex-start"
+                            >
+                                <InputLabel label="Price Type" />
                                 <ToggleGroup
                                     flex={4}
                                     orientation="horizontal"
@@ -143,7 +133,7 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                                     type="single"
                                     size="$1"
                                     disableDeactivation
-                                    value={values.price_type}
+                                    value={values.price_type ?? undefined}
                                     onValueChange={(type) => setFieldValue('price_type', type)}
                                 >
                                     <ToggleGroup.Item value="weight" aria-label="Left aligned">
@@ -155,41 +145,19 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                                 </ToggleGroup>
                             </XStack>
                             <XStack gap="$3" width="100%" alignItems="center">
-                                <Label size="$2" width="$4" htmlFor="name" flex={1}>
-                                    Quantity
-                                </Label>
-                                <Input
-                                    size="$3"
-                                    flex={4}
+                                <InputLabel label="Quantity" />
+                                <InputField
+                                    fieldName="quantity"
                                     placeholder="Enter quantity here..."
                                     keyboardType="numeric"
-                                    value={values.quantity}
-                                    onChangeText={(quantity) => setFieldValue('quantity', quantity)}
-                                    onFocus={() => {
-                                        shouldHandleKeyboardEvents.value = true;
-                                    }}
-                                    onBlur={() => {
-                                        shouldHandleKeyboardEvents.value = false;
-                                    }}
                                 />
                             </XStack>
                             <XStack gap="$3" width="100%" alignItems="center">
-                                <Label size="$1" width="$4" htmlFor="name" flex={1}>
-                                    Price/item
-                                </Label>
-                                <Input
-                                    size="$3"
-                                    flex={4}
+                                <InputLabel label="Price/item" />
+                                <InputField
+                                    fieldName="price"
                                     placeholder="Enter price (estimated) here..."
                                     keyboardType="numeric"
-                                    value={values.price}
-                                    onChangeText={(price) => setFieldValue('price', price)}
-                                    onFocus={() => {
-                                        shouldHandleKeyboardEvents.value = true;
-                                    }}
-                                    onBlur={() => {
-                                        shouldHandleKeyboardEvents.value = false;
-                                    }}
                                 />
                             </XStack>
 

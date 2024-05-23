@@ -1,11 +1,14 @@
-import BottomSheet from '@gorhom/bottom-sheet';
 import { ListPlus } from '@tamagui/lucide-icons';
 import { useState, useEffect, useCallback, memo } from 'react';
-import { Keyboard } from 'react-native';
-import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist';
-import { Button, H5, Separator, Tabs } from 'tamagui';
+import DraggableFlatList, {
+    DragEndParams,
+    RenderItemParams,
+} from 'react-native-draggable-flatlist';
+import { Button, H5, Separator, SizableText, Tabs } from 'tamagui';
 
 import { AddListItemForm } from './AddListItemForm';
+import FormBottomSheet from './FormBottomSheet';
+import LoadingView from './LoadingView';
 import StoreListItem from './StoreListItem';
 
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
@@ -17,10 +20,10 @@ import { ListItemWithData } from '@/types/list';
 const EditListTabs = () => {
     const { itemsWithCost, handleUpdateListItem, setItemsWithCost } = useListItemsProviderContext();
 
-    const { handleOpenPress, sheetRef } = useBottomSheetProviderContext();
+    const { handleOpenPress } = useBottomSheetProviderContext();
     const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
-    const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>([]);
-    const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>([]);
+    const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
+    const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
     useEffect(() => {
         setUncheckedItems(
@@ -49,17 +52,10 @@ const EditListTabs = () => {
         [handleUpdateListItem],
     );
 
-    const renderItem = useCallback(
-        (props: RenderItemParams<ListItemWithData>) => (
-            <StoreListItem {...props} setItemToEdit={setItemToEdit} />
-        ),
-        [],
-    );
-
     const handleDragEnd = useCallback(
         async (
             dragData: ListItemWithData[],
-            setFxn: React.Dispatch<React.SetStateAction<ListItemWithData[]>>,
+            setFxn: React.Dispatch<React.SetStateAction<ListItemWithData[] | undefined>>,
             checked: boolean,
         ) => {
             const dataToSet = dragData.map((item, i) => ({ ...item, list_order: i }));
@@ -72,12 +68,19 @@ const EditListTabs = () => {
                 'list_items',
             );
             if (checked) {
-                setItemsWithCost(unCheckedItems.concat(dataToSet));
+                setItemsWithCost(unCheckedItems?.concat(dataToSet) ?? []);
             } else {
-                setItemsWithCost(checkedItems.concat(dataToSet));
+                setItemsWithCost(checkedItems?.concat(dataToSet) ?? []);
             }
         },
         [checkedItems, setItemsWithCost, unCheckedItems],
+    );
+
+    const renderItem = useCallback(
+        (props: RenderItemParams<ListItemWithData>) => (
+            <StoreListItem {...props} setItemToEdit={setItemToEdit} />
+        ),
+        [],
     );
 
     return (
@@ -97,18 +100,17 @@ const EditListTabs = () => {
                     <H5>Checked</H5>
                 </Tabs.Tab>
             </Tabs.List>
-            <Tabs.Content value="tab1" flex={1}>
-                <DraggableFlatList
-                    data={unCheckedItems ?? []}
-                    onDragEnd={({ data }) => handleDragEnd(data, setUncheckedItems, false)}
-                    keyExtractor={(item, i) => item.list_item_id + item.item_name}
-                    renderItem={renderItem}
-                    containerStyle={{ maxHeight: '88%' }}
-                    showsVerticalScrollIndicator={false}
-                />
+            <Tabs.Content value="tab1" flex={0.9}>
+                <LoadingView loading={!unCheckedItems} message="">
+                    <DraggableList
+                        listItems={unCheckedItems ?? []}
+                        handleDragEnd={({ data }) => handleDragEnd(data, setUncheckedItems, true)}
+                        renderItem={renderItem}
+                    />
+                </LoadingView>
                 <Button
                     icon={ListPlus}
-                    marginTop="$4"
+                    marginVertical="$3"
                     onPress={() => {
                         setItemToEdit(undefined);
                         handleOpenPress();
@@ -116,33 +118,48 @@ const EditListTabs = () => {
                 />
             </Tabs.Content>
 
-            <Tabs.Content value="tab2">
-                <DraggableFlatList
-                    data={checkedItems ?? []}
-                    onDragEnd={({ data }) => handleDragEnd(data, setCheckedItems, true)}
-                    keyExtractor={(item, i) => item.list_item_id + item.item_name + i}
-                    showsVerticalScrollIndicator={false}
-                    renderItem={renderItem}
-                />
+            <Tabs.Content value="tab2" flex={1}>
+                <LoadingView loading={!checkedItems} message="">
+                    <DraggableList
+                        listItems={checkedItems ?? []}
+                        handleDragEnd={({ data }) => handleDragEnd(data, setCheckedItems, true)}
+                        renderItem={renderItem}
+                    />
+                </LoadingView>
             </Tabs.Content>
-            <BottomSheet
-                ref={sheetRef}
-                index={-1}
-                snapPoints={['65%', '98%']}
-                enablePanDownToClose
-                keyboardBlurBehavior="restore"
-                keyboardBehavior="extend"
-                onClose={() => {
-                    Keyboard.dismiss();
-                }}
-            >
+            <FormBottomSheet>
                 <AddListItemForm
                     itemToEdit={itemToEdit}
                     handleFormSubmit={itemToEdit ? handleSubmit : undefined}
                 />
-            </BottomSheet>
+            </FormBottomSheet>
         </Tabs>
     );
 };
 
 export default memo(EditListTabs);
+
+const DraggableList = ({
+    listItems,
+    handleDragEnd,
+    renderItem,
+}: {
+    listItems: ListItemWithData[] | undefined;
+    handleDragEnd: ((params: DragEndParams<ListItemWithData>) => void) | undefined;
+    renderItem: (props: RenderItemParams<ListItemWithData>) => React.JSX.Element;
+}) => {
+    return (
+        <DraggableFlatList
+            data={listItems ?? []}
+            onDragEnd={handleDragEnd}
+            keyExtractor={(item, i) => item.list_item_id + item.item_name}
+            showsVerticalScrollIndicator={false}
+            renderItem={renderItem}
+            ListEmptyComponent={
+                <SizableText marginVertical="$8" size="$4" alignSelf="center">
+                    Please add some items to get started...
+                </SizableText>
+            }
+        />
+    );
+};

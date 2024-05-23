@@ -1,15 +1,17 @@
-import { BottomSheetView, useBottomSheetInternal } from '@gorhom/bottom-sheet';
-import { Formik, FormikErrors } from 'formik';
+import { BottomSheetView } from '@gorhom/bottom-sheet';
+import { Formik } from 'formik';
 import { memo } from 'react';
-import { Button, H6, Input, Label, Separator, SizableText, XStack, YStack } from 'tamagui';
+import { Button, H6, Separator, SizableText, XStack, YStack } from 'tamagui';
 
 import FormErrorText from './FormErrorText';
+import InputField from './InputField';
+import InputLabel from './InputLabel';
 import StoreSelector from './StoreSelector';
 
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { newListValidationSchema } from '@/modules/add-list-item-validation';
-import { RowType } from '@/types/supabase-types';
+import { RowType } from '@/types/supabase';
 
 export type ListCreationType = Omit<
     RowType<'lists'>,
@@ -29,7 +31,6 @@ interface Props {
 function AddListForm({ setOpenForm }: Props) {
     const { handleAddList } = useListsProviderContext();
     const { handleClosePress } = useBottomSheetProviderContext();
-    const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
 
     return (
         <Formik
@@ -42,7 +43,7 @@ function AddListForm({ setOpenForm }: Props) {
                 });
             }}
         >
-            {({ values, errors, dirty, setFieldValue, handleSubmit, isValid, resetForm }) => (
+            {({ errors, dirty, handleSubmit, isValid, resetForm }) => (
                 <BottomSheetView style={{ flex: 1 }}>
                     <YStack
                         gap="$3"
@@ -61,21 +62,11 @@ function AddListForm({ setOpenForm }: Props) {
                         <Separator />
                         <SizableText>Please enter the name and choose the store</SizableText>
                         <XStack alignItems="center">
-                            <Label size="$1" htmlFor="name" width="$4" flex={1}>
-                                List Name
-                            </Label>
-                            <Input
-                                size="$3"
-                                flex={5}
+                            <InputLabel label="List Name" size="$1" />
+                            <InputField
+                                fieldName="item_name"
                                 placeholder="Enter name here..."
-                                value={values.list_name}
-                                onChangeText={(name) => setFieldValue('list_name', name)}
-                                onFocus={() => {
-                                    shouldHandleKeyboardEvents.value = true;
-                                }}
-                                onBlur={() => {
-                                    shouldHandleKeyboardEvents.value = false;
-                                }}
+                                keyboardType="default"
                             />
                         </XStack>
                         <StoreSelector />

@@ -120,10 +120,10 @@ export const getStores = async () => {
         });
 };
 
+const joinListStoreDataView = supabase.from('list_items_with_store_data').select(`*`);
+
 export const getListItemsWithData = async (listId: number, user_id: string) => {
-    return supabase
-        .from('list_items_with_store_data')
-        .select(`*`)
+    return joinListStoreDataView
         .eq('list_id', listId)
         .eq('user_id', user_id)
         .then(({ data, error }) => {
@@ -132,9 +132,7 @@ export const getListItemsWithData = async (listId: number, user_id: string) => {
 };
 
 export const getListItemsForStore = async (storeId: number, user_id: string) => {
-    return supabase
-        .from('list_items_with_store_data')
-        .select(`*`)
+    return joinListStoreDataView
         .eq('store_id', storeId)
         .eq('user_id', user_id)
         .then(({ data, error }) => {

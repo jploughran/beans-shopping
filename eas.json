@@ -1,39 +1,39 @@
 {
-    "cli": {
-        "version": ">= 7.8.2"
+  "cli": {
+    "version": ">= 7.8.2"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
     },
-    "build": {
-        "development": {
-            "developmentClient": true,
-            "distribution": "internal",
-            "channel": "development",
-            "android": {
-                "buildType": "apk"
-            },
-            "ios": {
-                "simulator": true
-            }
-        },
-        "preview": {
-            "distribution": "internal",
-            "channel": "preview-bean-shopping",
-            "android": {
-                "buildType": "apk",
-                "autoIncrement": "versionCode"
-            },
-            "ios": {
-                "applicationArchivePath": "ios/build/*",
-                "resourceClass": "m-medium"
-            }
-        },
-        "production": {
-            "ios": {
-                "resourceClass": "m-medium"
-            },
-            "channel": "production-bean-shopping"
-        }
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview-bean-shopping",
+      "android": {
+        "buildType": "apk",
+        "autoIncrement": "versionCode"
+      },
+      "ios": {
+        "applicationArchivePath": "ios/build/*",
+        "resourceClass": "m-medium"
+      }
     },
-    "submit": {
-        "production": {}
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "channel": "production-bean-shopping"
     }
+  },
+  "submit": {
+    "production": {}
+  }
 }

@@ -2,6 +2,7 @@
     "expo": {
         "name": "Bean Shopping",
         "slug": "beans-shopping",
+        "version": "1.0.9",
         "extra": {
             "eas": {
                 "projectId": "0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
@@ -18,6 +19,7 @@
             "backgroundColor": "#e9f9ee"
         },
         "ios": {
+            "buildNumber": "1",
             "bundleIdentifier": "com.synergetx.beansshopping",
             "backgroundColor": "#e9f9ee",
             "splash": {
