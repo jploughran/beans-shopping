@@ -1,12 +1,11 @@
-import BottomSheet from '@gorhom/bottom-sheet';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { ListPlus } from '@tamagui/lucide-icons';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
-import { Keyboard } from 'react-native';
 import { Button, ListItem, YStack } from 'tamagui';
 
 import AddListForm from '@/components/AddListForm';
+import FormBottomSheet from '@/components/FormBottomSheet';
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { List } from '@/types/list';
@@ -15,7 +14,7 @@ const keyExtractor = (item: List, index: number) => index.toString();
 
 export default function TabOneScreen() {
     const { allLists: lists, setSelectedList } = useListsProviderContext();
-    const { handleOpenPress, sheetRef } = useBottomSheetProviderContext();
+    const { handleOpenPress } = useBottomSheetProviderContext();
 
     const renderSingleRow: ListRenderItem<List> = useCallback(
         ({ item, ...rest }) => {
@@ -63,24 +62,16 @@ export default function TabOneScreen() {
                 icon={ListPlus}
                 size="$4"
                 onPress={() => {
+                    console.log('open list form');
                     handleOpenPress();
                 }}
             >
                 Add List
             </Button>
-            <BottomSheet
-                ref={sheetRef}
-                index={-1}
-                snapPoints={['65%', '98%']}
-                enablePanDownToClose
-                keyboardBlurBehavior="restore"
-                keyboardBehavior="extend"
-                onClose={() => {
-                    Keyboard.dismiss();
-                }}
-            >
+
+            <FormBottomSheet>
                 <AddListForm />
-            </BottomSheet>
+            </FormBottomSheet>
         </YStack>
     );
 }

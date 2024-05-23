@@ -1,5 +1,6 @@
 import BottomSheet from '@gorhom/bottom-sheet';
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { useFocusEffect } from 'expo-router';
 import { createContext, useCallback, useContext, useMemo, useRef } from 'react';
 import invariant from 'tiny-invariant';
 
@@ -23,8 +24,9 @@ export const BottomSheetProvider = ({
     const handleOpenPress = useCallback(() => {
         sheetRef.current?.snapToIndex(0);
     }, []);
+
     const handleClosePress = useCallback(() => {
-        sheetRef.current?.close();
+        sheetRef.current?.forceClose();
     }, []);
 
     const contextValue: BottomSheetProviderContextValues = useMemo(() => {
