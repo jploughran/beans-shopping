@@ -1,7 +1,6 @@
 {
     "name": "beans-shopping",
     "main": "expo-router/entry",
-    "version": "1.0.8",
     "scripts": {
         "start": "expo start -c",
         "android": "expo start --android",
@@ -12,8 +11,8 @@
         "build:dev-client": "eas build --profile development --local --clear-cache",
         "build:preview": "eas build --profile preview --local --clear-cache",
         "build:production": "eas build --profile production --local --clear-cache",
-        "publish:preview": " eas update --channel preview-bean-shopping",
-        "publish:production": " eas update --channel production-bean-shopping",
+        "publish:preview": "eas update --channel preview-bean-shopping",
+        "publish:production": "eas update --channel production-bean-shopping",
         "expo-doctor": "npx expo-doctor"
     },
     "jest": {
@@ -89,5 +88,6 @@
         "wrap-ansi": "7.0.0",
         "string-width": "4.1.0"
     },
-    "private": true
+    "private": true,
+    "version": "1.0.0"
 }

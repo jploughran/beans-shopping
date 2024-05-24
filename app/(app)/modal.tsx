@@ -1,12 +1,13 @@
 import Constants from 'expo-constants';
 import { SizableText } from 'tamagui';
+import { expo } from '../../app.json';
 
 import { initialScreenStyles } from './(tabs)/previousTrips';
 
 import { SignOutButton } from '@/components/SignOutButton';
 import { View } from '@/components/Themed';
 
-export const APP_VERSION = Constants.expoConfig?.version;
+export const APP_VERSION = expo.version;
 
 export default function ModalScreen() {
     return (
