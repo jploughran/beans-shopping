@@ -1,5 +1,5 @@
 import { ListPlus } from '@tamagui/lucide-icons';
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useCallback, memo } from 'react';
 import DraggableFlatList, {
     DragEndParams,
     RenderItemParams,
@@ -7,6 +7,7 @@ import DraggableFlatList, {
 import { Button, H5, Separator, SizableText, Tabs } from 'tamagui';
 
 import { AddListItemForm } from './AddListItemForm';
+import FormBottomSheet from './FormBottomSheet';
 import LoadingView from './LoadingView';
 import StoreListItem from './StoreListItem';
 
@@ -15,37 +16,19 @@ import { useListItemsProviderContext } from '@/context-providers/ListItemsProvid
 import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import { handleSupabaseUpsert } from '@/modules/supabase-list-utils';
 import { ListItemWithData } from '@/types/list';
-import BottomSheet from '@gorhom/bottom-sheet';
-import { Keyboard } from 'react-native';
 
 const EditListTabs = () => {
-    const { itemsWithCost, handleUpdateListItem, setItemsWithCost } = useListItemsProviderContext();
+    const {
+        handleUpdateListItem,
+        setItemsWithCost,
+        checkedItems,
+        unCheckedItems,
+        setCheckedItems,
+        setUncheckedItems,
+    } = useListItemsProviderContext();
 
-    const { handleOpenPress, sheetRef } = useBottomSheetProviderContext();
+    const { handleOpenPress } = useBottomSheetProviderContext();
     const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
-    const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>(
-        itemsWithCost
-            .filter(({ completed }) => !completed)
-            .sort((a, b) => a.list_order - b.list_order),
-    );
-    const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>(
-        itemsWithCost
-            .filter(({ completed }) => completed)
-            .sort((a, b) => a.list_order - b.list_order),
-    );
-
-    useEffect(() => {
-        setUncheckedItems(
-            itemsWithCost
-                .filter(({ completed }) => !completed)
-                .sort((a, b) => a.list_order - b.list_order),
-        );
-        setCheckedItems(
-            itemsWithCost
-                .filter(({ completed }) => completed)
-                .sort((a, b) => a.list_order - b.list_order),
-        );
-    }, [itemsWithCost]);
 
     const handleSubmit = useCallback(
         async (formValues: InitialListItemFormValue) => {
@@ -64,11 +47,11 @@ const EditListTabs = () => {
     const handleDragEnd = useCallback(
         async (
             dragData: ListItemWithData[],
-            setFxn: React.Dispatch<React.SetStateAction<ListItemWithData[]>>,
+            setFxn: React.Dispatch<React.SetStateAction<ListItemWithData[] | undefined>>,
             checked: boolean,
         ) => {
             const dataToSet = dragData.map((item, i) => ({ ...item, list_order: i }));
-            setFxn(dataToSet);
+            setFxn(dataToSet.sort((a, b) => a.list_order - b.list_order));
             await handleSupabaseUpsert(
                 dataToSet.map(({ list_item_id, list_order, list_id, item_id }) => ({
                     list_item_id,
@@ -138,22 +121,12 @@ const EditListTabs = () => {
                     />
                 </LoadingView>
             </Tabs.Content>
-            <BottomSheet
-                ref={sheetRef}
-                index={-1}
-                snapPoints={['65%', '98%']}
-                enablePanDownToClose
-                keyboardBlurBehavior="restore"
-                keyboardBehavior="extend"
-                onClose={() => {
-                    Keyboard.dismiss();
-                }}
-            >
+            <FormBottomSheet>
                 <AddListItemForm
                     itemToEdit={itemToEdit}
                     handleFormSubmit={itemToEdit ? handleSubmit : undefined}
                 />
-            </BottomSheet>
+            </FormBottomSheet>
         </Tabs>
     );
 };

@@ -26,11 +26,11 @@ const EditList = () => {
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
     useEffect(
-        () => setUncheckedItems(itemsWithCost.filter(({ completed }) => !completed)),
+        () => setUncheckedItems(itemsWithCost?.filter(({ completed }) => !completed)),
         [itemsWithCost],
     );
     useEffect(
-        () => setCheckedItems(itemsWithCost.filter(({ completed }) => completed)),
+        () => setCheckedItems(itemsWithCost?.filter(({ completed }) => completed)),
         [itemsWithCost],
     );
 
