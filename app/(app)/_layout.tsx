@@ -9,6 +9,7 @@ import { ListItemsProvider } from '@/context-providers/ListItemsProvider';
 import { ListsProvider } from '@/context-providers/ListProvider';
 import { useUserProviderContext } from '@/context-providers/UserProvider';
 import { useUpdateModal } from '@/hooks/useUpdateModal';
+import { SizableText } from 'tamagui';
 
 export default function AppLayout() {
     const { session } = useUserProviderContext();
@@ -60,6 +61,15 @@ export default function AppLayout() {
                                 headerBackVisible: true,
                                 headerBackTitleVisible: false,
                                 headerTitle: () => <EditListTopTabName />,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="createList"
+                            options={{
+                                headerShown: true,
+                                headerBackVisible: true,
+                                headerBackTitleVisible: false,
+                                headerTitle: () => <SizableText>Create List</SizableText>,
                             }}
                         />
                         <Stack.Screen

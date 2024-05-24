@@ -62,16 +62,11 @@ export default function TabOneScreen() {
                 icon={ListPlus}
                 size="$4"
                 onPress={() => {
-                    console.log('open list form');
-                    handleOpenPress();
+                    router.push('/createList');
                 }}
             >
                 Add List
             </Button>
-
-            <FormBottomSheet>
-                <AddListForm />
-            </FormBottomSheet>
         </YStack>
     );
 }

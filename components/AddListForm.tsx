@@ -1,14 +1,12 @@
-import { BottomSheetView } from '@gorhom/bottom-sheet';
+import { router } from 'expo-router';
 import { Formik } from 'formik';
 import { memo } from 'react';
-import { Button, H6, Separator, SizableText, XStack, YStack } from 'tamagui';
+import { Button, H6, Input, Separator, SizableText, XStack, YStack } from 'tamagui';
 
 import FormErrorText from './FormErrorText';
-import InputField from './InputField';
 import InputLabel from './InputLabel';
 import StoreSelector from './StoreSelector';
 
-import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { newListValidationSchema } from '@/modules/add-list-item-validation';
 import { RowType } from '@/types/supabase';
@@ -30,7 +28,6 @@ interface Props {
 
 function AddListForm({ setOpenForm }: Props) {
     const { handleAddList } = useListsProviderContext();
-    const { handleClosePress } = useBottomSheetProviderContext();
 
     return (
         <Formik
@@ -39,65 +36,68 @@ function AddListForm({ setOpenForm }: Props) {
             onSubmit={async (formValues, { resetForm }) => {
                 await handleAddList(formValues).then(() => {
                     resetForm();
-                    handleClosePress();
+                    router.push('/(tabs)');
                 });
             }}
         >
-            {({ errors, dirty, handleSubmit, isValid, resetForm }) => (
-                <BottomSheetView style={{ flex: 1 }}>
-                    <YStack
-                        gap="$3"
-                        flex={1}
-                        $gtSm={{
-                            alignSelf: 'center',
-                            width: '48%',
-                            borderWidth: '$0.5',
-                            borderColor: '$green6',
-                            borderRadius: '$4',
-                            padding: '$4',
-                            backgroundColor: '$green1',
-                        }}
-                    >
-                        <H6>Add New List</H6>
-                        <Separator />
-                        <SizableText>Please enter the name and choose the store</SizableText>
-                        <XStack alignItems="center">
-                            <InputLabel label="List Name" size="$1" />
-                            <InputField
-                                fieldName="item_name"
-                                placeholder="Enter name here..."
-                                keyboardType="default"
-                            />
-                        </XStack>
-                        <StoreSelector />
-                        <XStack gap="$4" justifyContent="flex-end">
-                            <Button
-                                minWidth={100}
-                                variant="outlined"
-                                borderWidth="$0.25"
-                                size="$3"
-                                onPress={() => {
-                                    handleClosePress();
-                                    resetForm();
-                                }}
-                            >
-                                Close
-                            </Button>
-                            <Button
-                                minWidth={100}
-                                disabled={!dirty || !isValid}
-                                size="$3"
-                                disabledStyle={{ backgroundColor: '$red4' }}
-                                onPress={() => {
-                                    handleSubmit();
-                                }}
-                            >
-                                Submit
-                            </Button>
-                        </XStack>
-                        <FormErrorText errors={errors} />
-                    </YStack>
-                </BottomSheetView>
+            {({ errors, dirty, handleSubmit, isValid, resetForm, setFieldValue, values }) => (
+                <YStack
+                    margin="$4"
+                    gap="$3"
+                    flex={1}
+                    $gtSm={{
+                        alignSelf: 'center',
+                        width: '48%',
+                        borderWidth: '$0.5',
+                        borderColor: '$green6',
+                        borderRadius: '$4',
+                        padding: '$4',
+                        backgroundColor: '$green1',
+                    }}
+                >
+                    <H6>Add New List</H6>
+                    <Separator />
+                    <SizableText>Please enter the name and choose the store</SizableText>
+                    <XStack alignItems="center">
+                        <InputLabel label="List Name" size="$2" />
+
+                        <Input
+                            size="$3"
+                            flex={4}
+                            placeholder="Enter name here..."
+                            value={values.list_name}
+                            onChangeText={(name) => setFieldValue('list_name', name)}
+                        />
+                    </XStack>
+                    <StoreSelector />
+                    <XStack gap="$4" justifyContent="flex-end">
+                        <Button
+                            minWidth={100}
+                            variant="outlined"
+                            borderWidth="$0.25"
+                            size="$3"
+                            onPress={() => {
+                                router.push('/(tabs)');
+
+                                resetForm();
+                            }}
+                        >
+                            Close
+                        </Button>
+                        <Button
+                            minWidth={100}
+                            disabled={!dirty || !isValid}
+                            size="$3"
+                            disabledStyle={{ backgroundColor: '$red4' }}
+                            onPress={() => {
+                                handleSubmit();
+                            }}
+                        >
+                            Submit
+                        </Button>
+                    </XStack>
+                    <FormErrorText errors={errors} />
+                </YStack>
             )}
         </Formik>
     );

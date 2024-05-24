@@ -45,6 +45,7 @@ export const ListItemsProvider = ({
     useEffect(() => {
         if (list?.list_id && list.store_id) {
             const getListItems = async () => {
+                console.log('[getListItems] called');
                 const { list_id, user_id, store_id } = list;
                 setListItemsLoading(true);
                 await Promise.all([
@@ -85,9 +86,10 @@ export const ListItemsProvider = ({
 
     const handleRemoveListItem = useCallback(async (itemToRemoveId: number) => {
         handleRemoveSupabaseRow<ListItem>('list_item_id', itemToRemoveId, LIST_ITEMS).then(() => {
-            setItemsWithCost((prev) =>
-                prev.filter(({ list_item_id }) => list_item_id !== itemToRemoveId),
-            );
+            setItemsWithCost((prev) => {
+                const newItems = prev.filter(({ list_item_id }) => list_item_id !== itemToRemoveId);
+                return [...newItems];
+            });
         });
     }, []);
 

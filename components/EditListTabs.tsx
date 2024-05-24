@@ -22,8 +22,16 @@ const EditListTabs = () => {
 
     const { handleOpenPress } = useBottomSheetProviderContext();
     const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
-    const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
-    const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
+    const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>(
+        itemsWithCost
+            .filter(({ completed }) => !completed)
+            .sort((a, b) => a.list_order - b.list_order),
+    );
+    const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>(
+        itemsWithCost
+            .filter(({ completed }) => completed)
+            .sort((a, b) => a.list_order - b.list_order),
+    );
 
     useEffect(() => {
         setUncheckedItems(
@@ -55,22 +63,24 @@ const EditListTabs = () => {
     const handleDragEnd = useCallback(
         async (
             dragData: ListItemWithData[],
-            setFxn: React.Dispatch<React.SetStateAction<ListItemWithData[] | undefined>>,
+            setFxn: React.Dispatch<React.SetStateAction<ListItemWithData[]>>,
             checked: boolean,
         ) => {
             const dataToSet = dragData.map((item, i) => ({ ...item, list_order: i }));
             setFxn(dataToSet);
             await handleSupabaseUpsert(
-                dataToSet.map(({ list_item_id, list_order }) => ({
+                dataToSet.map(({ list_item_id, list_order, list_id, item_id }) => ({
                     list_item_id,
                     list_order,
+                    list_id,
+                    item_id,
                 })),
                 'list_items',
             );
             if (checked) {
-                setItemsWithCost(unCheckedItems?.concat(dataToSet) ?? []);
+                setItemsWithCost(unCheckedItems?.concat(dataToSet));
             } else {
-                setItemsWithCost(checkedItems?.concat(dataToSet) ?? []);
+                setItemsWithCost(checkedItems?.concat(dataToSet));
             }
         },
         [checkedItems, setItemsWithCost, unCheckedItems],
@@ -104,7 +114,7 @@ const EditListTabs = () => {
                 <LoadingView loading={!unCheckedItems} message="">
                     <DraggableList
                         listItems={unCheckedItems ?? []}
-                        handleDragEnd={({ data }) => handleDragEnd(data, setUncheckedItems, true)}
+                        handleDragEnd={({ data }) => handleDragEnd(data, setUncheckedItems, false)}
                         renderItem={renderItem}
                     />
                 </LoadingView>

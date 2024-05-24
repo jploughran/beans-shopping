@@ -10,8 +10,6 @@ const FormBottomSheet = ({
 }: BottomSheetProps & React.RefAttributes<BottomSheetMethods>) => {
     const { sheetRef } = useBottomSheetProviderContext();
 
-    console.log({ sheetRef });
-
     return (
         <BottomSheet
             ref={sheetRef}
