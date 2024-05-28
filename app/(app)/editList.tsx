@@ -1,5 +1,5 @@
 import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useMemo } from 'react';
 import { H5, Separator, SizableText, XStack, YStack } from 'tamagui';
 
 import EditListTabs from '@/components/EditListTabs';
@@ -20,19 +20,8 @@ const getCostForItems = (itemsWithCost?: ListItemWithData[]) =>
         : 'Loading...';
 
 const EditList = () => {
-    const { itemsWithCost, listItemsLoading } = useListItemsProviderContext();
-
-    const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
-    const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
-
-    useEffect(
-        () => setUncheckedItems(itemsWithCost?.filter(({ completed }) => !completed)),
-        [itemsWithCost],
-    );
-    useEffect(
-        () => setCheckedItems(itemsWithCost?.filter(({ completed }) => completed)),
-        [itemsWithCost],
-    );
+    const { itemsWithCost, listItemsLoading, checkedItems, unCheckedItems } =
+        useListItemsProviderContext();
 
     const estimatedTotal = useMemo(() => getCostForItems(itemsWithCost), [itemsWithCost]);
 

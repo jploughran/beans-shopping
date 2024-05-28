@@ -20,6 +20,7 @@ import {
     updateListItem,
 } from '@/modules/supabase-list-utils';
 import { LIST_ITEMS, ListItem, ListItemWithData } from '@/types/list';
+import { groupBy } from 'lodash';
 
 export interface ListItemsProviderContextValues {
     allStoreItemsWithCost: ListItemWithData[] | undefined;
@@ -49,42 +50,41 @@ export const ListItemsProvider = ({
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
     useEffect(() => {
-        setCheckedItems(
-            itemsWithCost
-                ?.filter(({ completed }) => completed)
-                .sort((a, b) => a.list_order - b.list_order),
-        );
-        setUncheckedItems(
-            itemsWithCost
-                ?.filter(({ completed }) => !completed)
-                .sort((a, b) => a.list_order - b.list_order),
-        );
+        // sort
+        const sortedItems = itemsWithCost?.sort((a, b) => a.list_order - b.list_order);
+        // lodash groupBy
+        const groupedItems = groupBy(sortedItems, 'completed');
+        setCheckedItems(groupedItems['true']);
+        setUncheckedItems(groupedItems['false']);
     }, [itemsWithCost]);
 
     useEffect(() => {
-        if (list?.list_id && list.store_id) {
+        if (list?.list_id && list?.user_id) {
             const getListItems = async () => {
-                console.log('[getListItems] called');
-                const { list_id, user_id, store_id } = list;
+                console.log('[getListItemsWithData] list_id called');
                 setListItemsLoading(true);
-                await Promise.all([
-                    getListItemsWithData(list_id, user_id)
-                        .then((listItems) => {
-                            setItemsWithCost(listItems);
-                        })
-                        .catch((e) => console.error(e)),
-                    getListItemsForStore(store_id, user_id)
-                        .then((listItems) => setAllStoreItemsWithCost(listItems))
-                        .catch((e) => console.error(e)),
-                ]).finally(() => setListItemsLoading(false));
+                await getListItemsWithData(list.list_id, list.user_id)
+                    .then((listItems) => {
+                        setItemsWithCost(listItems);
+                    })
+                    .catch((e) => console.error(e))
+                    .finally(() => setListItemsLoading(false));
             };
             getListItems();
         }
+    }, [list?.list_id, list?.user_id]);
 
-        return () => {
-            supabase.removeAllChannels();
-        };
-    }, [list]);
+    useEffect(() => {
+        if (list?.store_id && list?.user_id) {
+            const getListItems = async () => {
+                console.log('[getListItemsForStore] store_id called');
+                await getListItemsForStore(list.store_id, list.user_id)
+                    .then((listItems) => setAllStoreItemsWithCost(listItems))
+                    .catch((e) => console.error(e));
+            };
+            getListItems();
+        }
+    }, [list?.store_id, list?.user_id]);
 
     const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
         return updateListItem(itemToUpdate)

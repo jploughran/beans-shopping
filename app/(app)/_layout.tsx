@@ -1,6 +1,7 @@
 import { Redirect, Stack } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
+import { SizableText } from 'tamagui';
 
 import EditListTopTabName from '@/components/EditListTopTabName';
 import { UpdateDialog } from '@/components/UpdateDialog';
@@ -9,7 +10,6 @@ import { ListItemsProvider } from '@/context-providers/ListItemsProvider';
 import { ListsProvider } from '@/context-providers/ListProvider';
 import { useUserProviderContext } from '@/context-providers/UserProvider';
 import { useUpdateModal } from '@/hooks/useUpdateModal';
-import { SizableText } from 'tamagui';
 
 export default function AppLayout() {
     const { session } = useUserProviderContext();

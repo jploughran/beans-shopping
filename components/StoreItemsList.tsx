@@ -18,7 +18,7 @@ const StoreItemsList = () => {
     const { allStoreItemsWithCost } = useListItemsProviderContext();
     const [{ value: itemName }, ,] = useField<string>('item_name');
     const fuseList = useMemo(
-        () => new Fuse(allStoreItemsWithCost, fuseOptions),
+        () => new Fuse(allStoreItemsWithCost ?? [], fuseOptions),
         [allStoreItemsWithCost],
     );
 
