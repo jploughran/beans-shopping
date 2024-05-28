@@ -173,6 +173,22 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                                 >
                                     Close
                                 </Button>
+                                {!values.completed && (
+                                    <Button
+                                        minWidth={100}
+                                        disabled={!isValid}
+                                        size="$3"
+                                        disabledStyle={{ backgroundColor: '$red4' }}
+                                        backgroundColor="$green6"
+                                        onPress={() => {
+                                            setFieldValue('completed', true).then(() =>
+                                                handleSubmit(),
+                                            );
+                                        }}
+                                    >
+                                        Check off
+                                    </Button>
+                                )}
                                 <Button
                                     minWidth={100}
                                     disabled={!isValid}
