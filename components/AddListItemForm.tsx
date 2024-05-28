@@ -45,11 +45,11 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                       price_type: 'count',
                       store_id: selectedList?.store_id ?? 0,
                       user_id: selectedList?.user_id ?? '',
-                      list_order: itemsWithCost.length,
+                      list_order: itemsWithCost?.length ?? 0,
                   },
         [
             itemToEdit,
-            itemsWithCost.length,
+            itemsWithCost?.length,
             selectedList?.list_id,
             selectedList?.store_id,
             selectedList?.user_id,
@@ -64,7 +64,7 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                 await addListItem(formValues)
                     .then((item) => {
                         setItemsWithCost((prev) =>
-                            prev.concat([{ ...item, list_order: prev.length }]),
+                            prev?.concat([{ ...item, list_order: prev.length }]),
                         );
                     })
                     .catch((e) => console.log(e));

@@ -53,6 +53,10 @@ const EditList = () => {
                     },
                 },
             ]}
+            $gtSm={{
+                alignSelf: 'center',
+                width: '50%',
+            }}
         >
             <H5 alignSelf="center">Totals</H5>
             <XStack gap="$8" alignItems="center" justifyContent="center">

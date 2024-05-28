@@ -34,7 +34,7 @@ export default function TabOneScreen() {
                     onPress={() => {
                         console.log({ name: item.list_name });
                         setSelectedList(item);
-                        router.push('/editList');
+                        router.push('/edit-list');
                     }}
                 />
             );
@@ -62,7 +62,7 @@ export default function TabOneScreen() {
                 icon={ListPlus}
                 size="$4"
                 onPress={() => {
-                    router.push('/createList');
+                    router.push('/create-list');
                 }}
             >
                 Add List
