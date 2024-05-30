@@ -70,8 +70,8 @@ export const ListItemsProvider = ({
         const sortedItems = itemsWithCost?.sort((a, b) => a.list_order - b.list_order);
         // lodash groupBy
         const groupedItems = groupBy(sortedItems, 'completed');
-        setCheckedItems(groupedItems['true']);
-        setUncheckedItems(groupedItems['false']);
+        setCheckedItems(groupedItems['true'] ?? []);
+        setUncheckedItems(groupedItems['false'] ?? []);
     }, [itemsWithCost]);
 
     useEffect(() => {
