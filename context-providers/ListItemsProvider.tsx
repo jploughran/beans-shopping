@@ -62,6 +62,7 @@ export const ListItemsProvider = ({
     const [listItemsLoading, setListItemsLoading] = useState(true);
     const list = useSelectedList();
     const [allStoreItemsWithCost, setAllStoreItemsWithCost] = useState<ListItemWithData[]>([]);
+
     const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 

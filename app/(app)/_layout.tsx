@@ -10,6 +10,7 @@ import { ListItemsProvider } from '@/context-providers/ListItemsProvider';
 import { ListsProvider } from '@/context-providers/ListProvider';
 import { useUserProviderContext } from '@/context-providers/UserProvider';
 import { useUpdateModal } from '@/hooks/useUpdateModal';
+import { StoreItemProvider } from '@/context-providers/StoreItemsProvider';
 
 export default function AppLayout() {
     const { session } = useUserProviderContext();
@@ -49,39 +50,40 @@ export default function AppLayout() {
     return (
         <ListsProvider>
             <ListItemsProvider>
-                {updateModal ? <UpdateDialog /> : null}
-
-                <BottomSheetProvider>
-                    <Stack initialRouteName="/(tabs)">
-                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                        <Stack.Screen
-                            name="edit-list"
-                            options={{
-                                headerShown: true,
-                                headerBackVisible: true,
-                                headerBackTitleVisible: false,
-                                headerTitle: () => <EditListTopTabName />,
-                            }}
-                        />
-                        <Stack.Screen
-                            name="create-list"
-                            options={{
-                                headerShown: true,
-                                headerBackVisible: true,
-                                headerBackTitleVisible: false,
-                                headerTitle: () => <SizableText>Create List</SizableText>,
-                            }}
-                        />
-                        <Stack.Screen
-                            name="modal"
-                            options={{
-                                headerBackVisible: true,
-                                headerBackTitleVisible: false,
-                                headerTitle: 'Settings',
-                            }}
-                        />
-                    </Stack>
-                </BottomSheetProvider>
+                <StoreItemProvider>
+                    {updateModal ? <UpdateDialog /> : null}
+                    <BottomSheetProvider>
+                        <Stack initialRouteName="/(tabs)">
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            <Stack.Screen
+                                name="edit-list"
+                                options={{
+                                    headerShown: true,
+                                    headerBackVisible: true,
+                                    headerBackTitleVisible: false,
+                                    headerTitle: () => <EditListTopTabName />,
+                                }}
+                            />
+                            <Stack.Screen
+                                name="create-list"
+                                options={{
+                                    headerShown: true,
+                                    headerBackVisible: true,
+                                    headerBackTitleVisible: false,
+                                    headerTitle: () => <SizableText>Create List</SizableText>,
+                                }}
+                            />
+                            <Stack.Screen
+                                name="modal"
+                                options={{
+                                    headerBackVisible: true,
+                                    headerBackTitleVisible: false,
+                                    headerTitle: 'Settings',
+                                }}
+                            />
+                        </Stack>
+                    </BottomSheetProvider>
+                </StoreItemProvider>
             </ListItemsProvider>
         </ListsProvider>
     );

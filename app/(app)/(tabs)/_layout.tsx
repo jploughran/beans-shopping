@@ -41,9 +41,9 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="previousTrips"
+                name="previous-trips"
                 options={{
-                    title: 'Previous Trips',
+                    title: 'Store Items',
                     tabBarIcon: ({ color }) => <Receipt color={color} />,
                 }}
             />

@@ -6,6 +6,7 @@ import { Input, Label, ListItem, ScrollView, XStack, YStack } from 'tamagui';
 
 import { getStores } from '@/modules/supabase-list-utils';
 import { Store } from '@/types/list';
+import { useStoreItemProviderContext } from '@/context-providers/StoreItemsProvider';
 
 const fuseOptions: IFuseOptions<Store> = {
     minMatchCharLength: 2,
@@ -13,7 +14,11 @@ const fuseOptions: IFuseOptions<Store> = {
     keys: [{ name: 'storename', weight: 2.5 }],
 };
 
-const StoreSelector = () => {
+interface Props {
+    manageStore?: boolean;
+}
+
+const StoreSelector = ({ manageStore }: Props) => {
     const [stores, setStores] = useState<Store[]>([]);
     const [name, setName] = useState('');
 
@@ -44,7 +49,12 @@ const StoreSelector = () => {
                 <ScrollView horizontal flexDirection="row">
                     <XStack gap="$2">
                         {fuseList.search(name).map(({ item }) => (
-                            <StoreItem key={item.created_at} item={item} setName={setName} />
+                            <StoreItem
+                                key={item.created_at}
+                                item={item}
+                                setName={setName}
+                                manageStore={manageStore}
+                            />
                         ))}
                     </XStack>
                 </ScrollView>
@@ -58,10 +68,13 @@ export default memo(StoreSelector);
 const StoreItem = ({
     item,
     setName,
+    manageStore,
 }: {
     item: Store;
     setName: (value: React.SetStateAction<string>) => void;
+    manageStore?: boolean;
 }) => {
+    const { setSelectedStoreId } = useStoreItemProviderContext();
     const [{ value: store_id }, , { setValue: setStoreId }] = useField<number>('store_id');
 
     const isChosen = useMemo(() => store_id === item.store_id, [item.store_id, store_id]);
@@ -75,6 +88,7 @@ const StoreItem = ({
             borderRadius="$3"
             pressTheme
             onPress={() => {
+                setSelectedStoreId(item.store_id);
                 setStoreId(item.store_id);
                 setName(item.storename);
             }}

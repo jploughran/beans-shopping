@@ -1,8 +1,8 @@
 import { InitialListItemFormValue } from './add-list-item-validation';
 import { supabase } from './supabase';
 
-import { ITEMS, LISTS, LIST_ITEMS, List, ListItemWithData, Store } from '@/types/list';
-import { Database, ExistingTables, InsertType } from '@/types/supabase';
+import { ITEMS, LISTS, LIST_ITEMS, List, ListItemWithData, Store, StoreItem } from '@/types/list';
+import { Database, ExistingTables, InsertType, RowType } from '@/types/supabase';
 
 export const addListToTable = async (storeId: number, listName: string) => {
     const { data, error } = await supabase
@@ -61,10 +61,32 @@ export const addListItem = async (
         .catch((e) => Promise.reject(e));
 };
 
+export const addStoreItem = async (itemData: Omit<StoreItem, 'created_at'>): Promise<StoreItem> => {
+    try {
+        const { store_id, item_name, price, price_type, user_id, item_id } = itemData;
+
+        return handleSupabaseInsertRow(
+            {
+                store_id,
+                item_name,
+                price: parseFloat(`${price}` ?? '0'),
+                price_type,
+                user_id,
+                item_id,
+            },
+            ITEMS,
+        ).then(async (itemAddedToStore) => {
+            return itemAddedToStore;
+        });
+    } catch (error) {
+        return Promise.reject(error);
+    }
+};
+
 export async function handleSupabaseInsertRow<T extends ExistingTables>(
     data: InsertType<T>,
     tableToUpdate: T,
-) {
+): Promise<RowType<T>> {
     const { data: data_1, error } = await supabase
         .from(tableToUpdate)
         .upsert({ ...data })
@@ -139,6 +161,15 @@ export const getListItemsForStore = async (storeId: number, user_id: string) => 
         .eq('user_id', user_id)
         .then(({ data, error }) => {
             return data ? Promise.resolve(data as ListItemWithData[]) : Promise.reject(error);
+        });
+};
+
+export const getItemsForStores = async () => {
+    return supabase
+        .from('items')
+        .select(`*`)
+        .then(({ data, error }) => {
+            return data ? Promise.resolve(data as StoreItem[]) : Promise.reject(error);
         });
 };
 

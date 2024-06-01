@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import { SizableText } from 'tamagui';
 import { expo } from '../../app.json';
 
-import { initialScreenStyles } from './(tabs)/previousTrips';
+import { initialScreenStyles } from './(tabs)/previous-trips';
 
 import { SignOutButton } from '@/components/SignOutButton';
 import { View } from '@/components/Themed';

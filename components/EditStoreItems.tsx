@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 
-export default function TabTwoScreen() {
+export default function EditStoreItems() {
     return (
         <View style={initialScreenStyles.container}>
             <Text style={initialScreenStyles.title}>Coming soon...</Text>
