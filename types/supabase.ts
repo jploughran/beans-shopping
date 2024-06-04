@@ -11,6 +11,7 @@ export type Database = {
                     price: number | null;
                     price_type: Database['public']['Enums']['price_type'] | null;
                     store_id: number;
+                    store_section: Database['public']['Enums']['store_location'];
                     user_id: string;
                 };
                 Insert: {
@@ -20,6 +21,7 @@ export type Database = {
                     price?: number | null;
                     price_type?: Database['public']['Enums']['price_type'] | null;
                     store_id: number;
+                    store_section?: Database['public']['Enums']['store_location'];
                     user_id?: string;
                 };
                 Update: {
@@ -29,6 +31,7 @@ export type Database = {
                     price?: number | null;
                     price_type?: Database['public']['Enums']['price_type'] | null;
                     store_id?: number;
+                    store_section?: Database['public']['Enums']['store_location'];
                     user_id?: string;
                 };
                 Relationships: [
@@ -81,21 +84,21 @@ export type Database = {
                 };
                 Relationships: [
                     {
-                        foreignKeyName: 'listitems_item_id_fkey';
+                        foreignKeyName: 'list_items_item_id_fkey';
                         columns: ['item_id'];
                         isOneToOne: false;
                         referencedRelation: 'items';
                         referencedColumns: ['item_id'];
                     },
                     {
-                        foreignKeyName: 'listitems_item_id_fkey';
+                        foreignKeyName: 'list_items_item_id_fkey';
                         columns: ['item_id'];
                         isOneToOne: false;
                         referencedRelation: 'list_items_with_store_data';
                         referencedColumns: ['item_id'];
                     },
                     {
-                        foreignKeyName: 'listitems_list_id_fkey';
+                        foreignKeyName: 'list_items_list_id_fkey';
                         columns: ['list_id'];
                         isOneToOne: false;
                         referencedRelation: 'lists';
@@ -210,6 +213,7 @@ export type Database = {
                     item_name: string | null;
                     list_id: number | null;
                     list_item_id: number | null;
+                    list_order: number | null;
                     price: number | null;
                     price_type: Database['public']['Enums']['price_type'] | null;
                     quantity: number | null;
@@ -225,7 +229,7 @@ export type Database = {
                         referencedColumns: ['store_id'];
                     },
                     {
-                        foreignKeyName: 'listitems_list_id_fkey';
+                        foreignKeyName: 'list_items_list_id_fkey';
                         columns: ['list_id'];
                         isOneToOne: false;
                         referencedRelation: 'lists';
@@ -246,6 +250,15 @@ export type Database = {
         };
         Enums: {
             price_type: 'weight' | 'count';
+            store_location:
+                | 'Produce'
+                | 'Bulk'
+                | 'Meat/Deli'
+                | 'Dairy/Eggs'
+                | 'Frozen'
+                | 'Toiletries/Paper Products/Cleaning Supplies'
+                | 'Non-perishable'
+                | 'Miscellaneous';
         };
         CompositeTypes: {
             [_ in never]: never;
