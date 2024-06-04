@@ -74,7 +74,7 @@ const StoreItem = ({
     setName: (value: React.SetStateAction<string>) => void;
     manageStore?: boolean;
 }) => {
-    const { setSelectedStoreId } = useStoreItemProviderContext();
+    const { setSelectedStoreId, setSelectedStoreName } = useStoreItemProviderContext();
     const [{ value: store_id }, , { setValue: setStoreId }] = useField<number>('store_id');
 
     const isChosen = useMemo(() => store_id === item.store_id, [item.store_id, store_id]);
@@ -89,6 +89,7 @@ const StoreItem = ({
             pressTheme
             onPress={() => {
                 setSelectedStoreId(item.store_id);
+                setSelectedStoreName(item.storename);
                 setStoreId(item.store_id);
                 setName(item.storename);
             }}

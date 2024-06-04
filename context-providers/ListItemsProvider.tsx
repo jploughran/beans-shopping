@@ -20,6 +20,7 @@ import {
     updateListItem,
 } from '@/modules/supabase-list-utils';
 import { LIST_ITEMS, ListItem, ListItemWithData } from '@/types/list';
+import { upsertIntoArray } from '@/utils/array-utils';
 
 export interface ListItemsProviderContextValues {
     allStoreItemsWithCost: ListItemWithData[] | undefined;
@@ -33,23 +34,6 @@ export interface ListItemsProviderContextValues {
     checkedItems: ListItemWithData[] | undefined;
     setCheckedItems: Dispatch<SetStateAction<ListItemWithData[] | undefined>>;
 }
-
-const updateListItemInArray = (
-    list: ListItemWithData[] | undefined,
-    updatedItem: ListItemWithData,
-) => {
-    const newData =
-        list?.reduce((itemsToReturn, currentItem) => {
-            if (currentItem.list_item_id === updatedItem.list_item_id) {
-                itemsToReturn.push(updatedItem);
-            } else {
-                itemsToReturn.push(currentItem);
-            }
-            return itemsToReturn;
-        }, [] as ListItemWithData[]) ?? [];
-
-    return [...newData];
-};
 
 export const ListItemsProviderContext = createContext<ListItemsProviderContextValues | null>(null);
 
@@ -106,8 +90,12 @@ export const ListItemsProvider = ({
     const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
         return updateListItem(itemToUpdate)
             .then((updatedItem) => {
-                setItemsWithCost((prev) => updateListItemInArray(prev, updatedItem));
-                setAllStoreItemsWithCost((prev) => updateListItemInArray(prev, updatedItem));
+                setItemsWithCost((prev) =>
+                    upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+                );
+                setAllStoreItemsWithCost((prev) =>
+                    upsertIntoArray<ListItemWithData>(prev, updatedItem, 'list_item_id'),
+                );
                 return updatedItem;
             })
             .catch((e) => {

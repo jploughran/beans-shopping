@@ -41,7 +41,7 @@ export default function MaterialTable<T extends object>({
     onSelectionChange,
     ...rest
 }: Props<T>) {
-    const tableHeight = ((window.innerHeight - 64 - 52 - 1) / window.innerHeight) * 100;
+    const tableHeight = ((window.innerHeight - 64 - 52 - 1) / window.innerHeight) * 65;
     const tableOptions = useMemo(
         (): Options<T> => ({
             actionsColumnIndex: -1,
@@ -53,11 +53,11 @@ export default function MaterialTable<T extends object>({
             maxColumnSort: 1,
             maxBodyHeight: `${tableHeight}vh`,
             minBodyHeight: `${tableHeight}vh`,
-            pageSizeOptions: [100, 1000],
+            pageSizeOptions: [50, 100, 1000],
             pageSize: 100,
             selection: !!onSelectionChange,
             thirdSortClick: false,
-            ...(options || {}),
+            ...(options ?? {}),
         }),
         [onSelectionChange, options, tableHeight],
     );

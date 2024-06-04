@@ -1,3 +1,4 @@
+import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
 import { InitialListItemFormValue } from './add-list-item-validation';
 import { supabase } from './supabase';
 
@@ -61,9 +62,9 @@ export const addListItem = async (
         .catch((e) => Promise.reject(e));
 };
 
-export const addStoreItem = async (itemData: Omit<StoreItem, 'created_at'>): Promise<StoreItem> => {
+export const addStoreItem = async (itemData: ItemFormInitialValues): Promise<StoreItem> => {
     try {
-        const { store_id, item_name, price, price_type, user_id, item_id } = itemData;
+        const { store_id, item_name, price, price_type, item_id } = itemData;
 
         return handleSupabaseInsertRow(
             {
@@ -71,7 +72,6 @@ export const addStoreItem = async (itemData: Omit<StoreItem, 'created_at'>): Pro
                 item_name,
                 price: parseFloat(`${price}` ?? '0'),
                 price_type,
-                user_id,
                 item_id,
             },
             ITEMS,

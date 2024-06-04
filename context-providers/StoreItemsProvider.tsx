@@ -2,31 +2,28 @@ import { groupBy } from 'lodash';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import invariant from 'tiny-invariant';
 
-import { addStoreItem, getItemsForStores } from '@/modules/supabase-list-utils';
-import { StoreItem } from '@/types/list';
+import { useSelectedList } from './ListProvider';
+
+import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
+import {
+    addStoreItem,
+    getItemsForStores,
+    handleRemoveSupabaseRow,
+} from '@/modules/supabase-list-utils';
+import { ITEMS, StoreItem } from '@/types/list';
+import { upsertIntoArray } from '@/utils/array-utils';
 
 export interface StoreItemContextProvider {
     selectedStoreItems: StoreItem[] | undefined;
-    setSelectedStoreId: React.Dispatch<React.SetStateAction<number | undefined>>;
-    handleUpdateStoreItem: (itemToUpdate: Omit<StoreItem, 'created_at'>) => Promise<StoreItem>;
     selectedStoreId: number | undefined;
+    selectedStoreName: string | undefined;
+    setSelectedStoreId: React.Dispatch<React.SetStateAction<number | undefined>>;
+    setSelectedStoreName: React.Dispatch<React.SetStateAction<string | undefined>>;
+    handleUpdateStoreItem: (itemToUpdate: ItemFormInitialValues) => Promise<StoreItem>;
+    handleRemoveListItem: (itemToRemoveId: number) => Promise<undefined>;
 }
 
 export const StoreItemProviderContext = createContext<StoreItemContextProvider | null>(null);
-
-const updateStoreItemInArray = (list: StoreItem[] | undefined, updatedItem: StoreItem) => {
-    const newData =
-        list?.reduce((itemsToReturn, currentItem) => {
-            if (currentItem.item_id === updatedItem.item_id) {
-                itemsToReturn.push(updatedItem);
-            } else {
-                itemsToReturn.push(currentItem);
-            }
-            return itemsToReturn;
-        }, [] as StoreItem[]) ?? [];
-
-    return [...newData];
-};
 
 export type AllStoreItems = Record<number, StoreItem[]>;
 
@@ -35,14 +32,22 @@ export const StoreItemProvider = ({
 }: Record<string, unknown> & {
     children?: React.ReactNode;
 }) => {
+    const listStoreId = useSelectedList()?.store_id;
     const [allStoreItems, setAllStoreItems] = useState<AllStoreItems>();
-    const [selectedStoreId, setSelectedStoreId] = useState<number>();
+    const [selectedStoreId, setSelectedStoreId] = useState<number | undefined>(listStoreId);
+    const [selectedStoreName, setSelectedStoreName] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (listStoreId) {
+            setSelectedStoreId(listStoreId);
+        }
+    }, [listStoreId]);
 
     const selectedStoreItems = useMemo(() => {
         if (!selectedStoreId || !allStoreItems) {
             return undefined;
         }
-        return allStoreItems[selectedStoreId];
+        return [...(allStoreItems[selectedStoreId] ?? [])];
     }, [allStoreItems, selectedStoreId]);
 
     useEffect(() => {
@@ -58,19 +63,23 @@ export const StoreItemProvider = ({
     }, []);
 
     const handleUpdateStoreItem = useCallback(
-        async (itemToUpdate: Omit<StoreItem, 'created_at'>) => {
+        async (itemToUpdate: ItemFormInitialValues) => {
             if (!selectedStoreId) {
                 return Promise.reject(new Error('Missing store Id [handleUpdateStoreItem]'));
             }
             return addStoreItem(itemToUpdate)
                 .then((updatedItem) => {
-                    setAllStoreItems((prev) => ({
-                        ...prev,
-                        [selectedStoreId]: updateStoreItemInArray(
-                            prev?.[selectedStoreId],
-                            updatedItem,
-                        ),
-                    }));
+                    setAllStoreItems((prev) => {
+                        const temp = {
+                            ...prev,
+                            [selectedStoreId]: upsertIntoArray<StoreItem>(
+                                prev?.[selectedStoreId] ?? [],
+                                updatedItem,
+                                'item_id',
+                            ),
+                        };
+                        return temp;
+                    });
                     return updatedItem;
                 })
                 .catch((e) => {
@@ -81,14 +90,47 @@ export const StoreItemProvider = ({
         [selectedStoreId],
     );
 
+    const handleRemoveListItem = useCallback(
+        async (itemToRemoveId: number) => {
+            if (!selectedStoreId) {
+                console.error('Missing store Id [handleUpdateStoreItem]');
+                return Promise.reject(new Error('Missing store Id [handleUpdateStoreItem]'));
+            }
+            await handleRemoveSupabaseRow<StoreItem>('item_id', itemToRemoveId, ITEMS)
+                .then(() => {
+                    setAllStoreItems((prev) => ({
+                        ...prev,
+                        [selectedStoreId]:
+                            prev?.[selectedStoreId].filter(
+                                ({ item_id }) => item_id !== itemToRemoveId,
+                            ) ?? [],
+                    }));
+                })
+                .catch((e) => {
+                    console.log('Error in [handleUpdateListItem]', { e });
+                    return Promise.reject(e);
+                });
+        },
+        [selectedStoreId],
+    );
+
     const contextValue: StoreItemContextProvider = useMemo(() => {
         return {
             setSelectedStoreId,
             selectedStoreItems,
+            selectedStoreName,
+            setSelectedStoreName,
             handleUpdateStoreItem,
             selectedStoreId,
+            handleRemoveListItem,
         };
-    }, [handleUpdateStoreItem, selectedStoreId, selectedStoreItems]);
+    }, [
+        handleRemoveListItem,
+        handleUpdateStoreItem,
+        selectedStoreId,
+        selectedStoreItems,
+        selectedStoreName,
+    ]);
 
     return (
         <StoreItemProviderContext.Provider value={contextValue}>

@@ -1,8 +1,8 @@
 import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { Formik } from 'formik';
-import { H5, Separator, SizableText, YStack } from 'tamagui';
+import { H3, YStack } from 'tamagui';
 
-import StoreItemTable from './StoreItemTable';
+import StoreItemTable from './StoreItemTable.web';
 import StoreSelector from './StoreSelector';
 
 export default function EditStoreItems() {
@@ -14,18 +14,14 @@ export default function EditStoreItems() {
             flex={1}
             $gtSm={{
                 alignSelf: 'center',
-                width: '75%',
+                width: '65%',
             }}
+            gap="$3"
         >
-            <H5 marginVertical="$4" alignSelf="center">
-                Manage Store Items
-            </H5>
-            <SizableText>Select Store</SizableText>
-            <Separator marginVertical="$4" />
+            <H3 marginTop="$4">Manage items for a store </H3>
             <Formik initialValues={{ store_id: undefined }} onSubmit={() => {}}>
                 <StoreSelector />
             </Formik>
-            <Separator marginVertical="$4" />
             <StoreItemTable />
         </YStack>
     );
