@@ -1,10 +1,10 @@
-import { Check, Component, GripVertical, MoreVertical, Trash } from '@tamagui/lucide-icons';
-import { memo, useCallback, useState } from 'react';
+import { Check, GripVertical } from '@tamagui/lucide-icons';
+import { memo, useCallback } from 'react';
 import { RenderItemParams } from 'react-native-draggable-flatlist';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { ListItem, XStack, Checkbox, Label, CheckedState, Button } from 'tamagui';
+import { ListItem, XStack, Checkbox, Label, CheckedState } from 'tamagui';
 
-import LoadingView from './LoadingView';
+import DeleteFromListButton from './DeleteFromListButton';
 
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
@@ -17,7 +17,7 @@ interface Props extends RenderItemParams<ListItemWithData> {
 }
 
 const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
-    const { handleUpdateListItem } = useListItemsProviderContext();
+    const { handleUpdateListItem, handleRemoveListItem } = useListItemsProviderContext();
     const { handleOpenPress } = useBottomSheetProviderContext();
 
     const handleChangeChecked = useCallback(
@@ -53,7 +53,12 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
     return (
         <Swipeable
             leftThreshold={20}
-            renderRightActions={() => <DeleteButton itemId={item.list_item_id} />}
+            renderRightActions={() => (
+                <DeleteFromListButton
+                    itemId={item.list_item_id}
+                    handleRemoveItem={handleRemoveListItem}
+                />
+            )}
             containerStyle={{ alignContent: 'center', flex: 1, justifyContent: 'center' }}
         >
             <ListItem borderRadius="$4" marginTop="$2" paddingVertical="$1" paddingHorizontal="$0">
@@ -101,25 +106,3 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
 };
 
 export default memo(StoreListItem);
-
-const DeleteButton = ({ itemId }: { itemId: number }) => {
-    const { handleRemoveListItem } = useListItemsProviderContext();
-    const [loading, setLoading] = useState(false);
-
-    const handleDelete = useCallback(async () => {
-        setLoading(true);
-        await handleRemoveListItem(itemId).finally(() => setLoading(false));
-    }, [handleRemoveListItem, itemId]);
-
-    return (
-        <LoadingView message="" loading={loading}>
-            <Button
-                alignSelf="center"
-                icon={<Trash color="$red10" />}
-                onPress={handleDelete}
-                padding="$3"
-                chromeless
-            />
-        </LoadingView>
-    );
-};
