@@ -1,4 +1,4 @@
-import { RowType } from './supabase';
+import { RowType, Database } from './supabase';
 
 export interface List {
     completed: boolean;
@@ -25,6 +25,19 @@ export interface Recipe {
     name: string;
     userId: string;
 }
+
+export type StoreSection = Database['public']['Enums']['store_location'];
+
+export const STORE_SECTIONS: StoreSection[] = [
+    'Produce',
+    'Bulk',
+    'Meat/Deli',
+    'Dairy/Eggs',
+    'Frozen',
+    'Toiletries/Paper Products/Cleaning Supplies',
+    'Non-perishable',
+    'Miscellaneous',
+];
 
 export const LISTS = 'lists';
 export const RECIPES = 'recipes';

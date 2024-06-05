@@ -4,5 +4,5 @@ export function upsertIntoArray<T>(array: T[], element: T, idKey: keyof T): T[] 
     if (i > -1)
         array[i] = element; // (2)
     else array.push(element);
-    return array;
+    return [...array];
 }

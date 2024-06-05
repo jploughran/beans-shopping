@@ -18,31 +18,11 @@ import { handleSupabaseUpsert } from '@/modules/supabase-list-utils';
 import { ListItemWithData } from '@/types/list';
 
 const EditListTabs = () => {
-    const {
-        handleUpdateListItem,
-        setItemsWithCost,
-        checkedItems,
-        unCheckedItems,
-        setCheckedItems,
-        setUncheckedItems,
-    } = useListItemsProviderContext();
+    const { setItemsWithCost, checkedItems, unCheckedItems, setCheckedItems, setUncheckedItems } =
+        useListItemsProviderContext();
 
     const { handleOpenPress } = useBottomSheetProviderContext();
     const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
-
-    const handleSubmit = useCallback(
-        async (formValues: InitialListItemFormValue) => {
-            const valuesToSubmit = {
-                ...formValues,
-                description: '',
-                price: parseFloat(formValues.price ?? '0'),
-                quantity: parseFloat(formValues.quantity ?? '0'),
-            } as ListItemWithData;
-            console.log(`handleSubmit called`, { valuesToSubmit });
-            await handleUpdateListItem(valuesToSubmit);
-        },
-        [handleUpdateListItem],
-    );
 
     const handleDragEnd = useCallback(
         async (
@@ -122,10 +102,7 @@ const EditListTabs = () => {
                 </LoadingView>
             </Tabs.Content>
             <FormBottomSheet>
-                <AddListItemForm
-                    itemToEdit={itemToEdit}
-                    handleFormSubmit={itemToEdit ? handleSubmit : undefined}
-                />
+                <AddListItemForm itemToEdit={itemToEdit} />
             </FormBottomSheet>
         </Tabs>
     );

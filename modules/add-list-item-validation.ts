@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 
 import { ListCreationType } from '@/components/AddListForm';
 import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
-import { ListItemWithData } from '@/types/list';
+import { ListItemWithData, STORE_SECTIONS, StoreSection } from '@/types/list';
 
 export interface InitialListItemFormValue
     extends Omit<ListItemWithData, 'item_id' | 'list_item_id' | 'quantity' | 'price'> {
@@ -24,7 +24,11 @@ export const newListItemValidationSchema: Yup.ObjectSchema<InitialListItemFormVa
     price: Yup.string().label('Price'),
     price_type: Yup.string().oneOf(['count', 'weight']).label('Price Type'),
     item_name: Yup.string().label('Item Name').required('A name is required'),
-    user_id: Yup.string().label('User sID').required('A user ID is required'),
+    user_id: Yup.string().label('User ID').required('A user ID is required'),
+    store_section: Yup.string<StoreSection>()
+        .label('Store section')
+        .required('A store section is required')
+        .oneOf(STORE_SECTIONS),
 });
 
 export const newListValidationSchema: Yup.ObjectSchema<ListCreationType> = Yup.object({
@@ -41,4 +45,8 @@ export const newStoreItemValidationSchema: Yup.ObjectSchema<ItemFormInitialValue
     price: Yup.number().label('Price'),
     price_type: Yup.string().oneOf(['count', 'weight']).label('Price Type').nullable(),
     item_name: Yup.string().label('Item Name').required('A name is required'),
+    store_section: Yup.string()
+        .label('Store section')
+        .required('A store section is required')
+        .oneOf(STORE_SECTIONS),
 });
