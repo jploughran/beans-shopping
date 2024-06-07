@@ -12,6 +12,7 @@ import {
 } from '@/modules/supabase-list-utils';
 import { ITEMS, StoreItem } from '@/types/list';
 import { upsertIntoArray } from '@/utils/array-utils';
+import { sortItemsBySection } from './ListItemsProvider';
 
 export interface StoreItemContextProvider {
     selectedStoreItems: StoreItem[] | undefined;
@@ -20,7 +21,7 @@ export interface StoreItemContextProvider {
     setSelectedStoreId: React.Dispatch<React.SetStateAction<number | undefined>>;
     setSelectedStoreName: React.Dispatch<React.SetStateAction<string | undefined>>;
     handleUpdateStoreItem: (itemToUpdate: ItemFormInitialValues) => Promise<StoreItem>;
-    handleRemoveListItem: (itemToRemoveId: number) => Promise<undefined>;
+    handleRemoveStoreItem: (itemToRemoveId: number) => Promise<undefined>;
 }
 
 export const StoreItemProviderContext = createContext<StoreItemContextProvider | null>(null);
@@ -47,7 +48,7 @@ export const StoreItemProvider = ({
         if (!selectedStoreId || !allStoreItems) {
             return undefined;
         }
-        return [...(allStoreItems[selectedStoreId] ?? [])];
+        return [...(sortItemsBySection(allStoreItems[selectedStoreId]) ?? [])];
     }, [allStoreItems, selectedStoreId]);
 
     useEffect(() => {
@@ -90,7 +91,7 @@ export const StoreItemProvider = ({
         [selectedStoreId],
     );
 
-    const handleRemoveListItem = useCallback(
+    const handleRemoveStoreItem = useCallback(
         async (itemToRemoveId: number) => {
             if (!selectedStoreId) {
                 console.error('Missing store Id [handleUpdateStoreItem]');
@@ -122,10 +123,10 @@ export const StoreItemProvider = ({
             setSelectedStoreName,
             handleUpdateStoreItem,
             selectedStoreId,
-            handleRemoveListItem,
+            handleRemoveStoreItem,
         };
     }, [
-        handleRemoveListItem,
+        handleRemoveStoreItem,
         handleUpdateStoreItem,
         selectedStoreId,
         selectedStoreItems,

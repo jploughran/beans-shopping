@@ -1,11 +1,11 @@
 import { router } from 'expo-router';
 import { memo } from 'react';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-
 import { ListItem } from 'tamagui';
 
 import DeleteFromListButton from './DeleteFromListButton';
 
+import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { List } from '@/types/list';
 
@@ -15,6 +15,7 @@ interface Props {
 
 const ListRow = ({ list }: Props) => {
     const { setSelectedList, handleRemoveList } = useListsProviderContext();
+    const { setListItemsLoading } = useListItemsProviderContext();
 
     return (
         <Swipeable
@@ -36,6 +37,7 @@ const ListRow = ({ list }: Props) => {
                 onPress={() => {
                     console.log({ name: list.list_name });
                     setSelectedList(list);
+                    setListItemsLoading(true);
                     router.push('/edit-list');
                 }}
             />

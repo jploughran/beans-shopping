@@ -8,6 +8,7 @@ import InputField from './InputField';
 import InputLabel from './InputLabel';
 import LoadingView from './LoadingView';
 import StoreItemsList from './StoreItemsList';
+import { StoreSectionSelector } from './StoreSectionSelector';
 
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
@@ -16,17 +17,14 @@ import {
     InitialListItemFormValue,
     newListItemValidationSchema,
 } from '@/modules/add-list-item-validation';
-import { addListItem } from '@/modules/supabase-list-utils';
 
 interface Props {
-    // setOpenForm: () => void;
     itemToEdit?: InitialListItemFormValue;
-    handleFormSubmit?: (formValues: InitialListItemFormValue) => Promise<void>;
 }
 
-export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
+export function AddListItemForm({ itemToEdit }: Props) {
     const { selectedList } = useListsProviderContext();
-    const { setItemsWithCost, itemsWithCost } = useListItemsProviderContext();
+    const { itemsWithCost, handleUpdateListItem } = useListItemsProviderContext();
     const { handleClosePress } = useBottomSheetProviderContext();
     const [loading, setLoading] = useState(false);
 
@@ -46,6 +44,7 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                       store_id: selectedList?.store_id ?? 0,
                       user_id: selectedList?.user_id ?? '',
                       list_order: itemsWithCost?.length ?? 0,
+                      store_section: 'Miscellaneous',
                   },
         [
             itemToEdit,
@@ -58,20 +57,11 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
     const handleFormSubmission = useCallback(
         async (formValues: InitialListItemFormValue) => {
             console.log('handleSubmit called in AddListItemForm');
-            if (handleFormSubmit) {
-                await handleFormSubmit(formValues);
-            } else {
-                await addListItem(formValues)
-                    .then((item) => {
-                        setItemsWithCost((prev) =>
-                            prev?.concat([{ ...item, list_order: prev.length }]),
-                        );
-                    })
-                    .catch((e) => console.log(e));
-            }
+
+            await handleUpdateListItem(formValues).catch((e) => console.log(e));
             handleClosePress();
         },
-        [handleClosePress, handleFormSubmit, setItemsWithCost],
+        [handleClosePress, handleUpdateListItem],
     );
 
     return (
@@ -160,6 +150,7 @@ export function AddListItemForm({ itemToEdit, handleFormSubmit }: Props) {
                                     keyboardType="numeric"
                                 />
                             </XStack>
+                            <StoreSectionSelector />
 
                             <XStack gap="$4" justifyContent="flex-end">
                                 <Button

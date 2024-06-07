@@ -2,16 +2,17 @@ import { Action, Column } from '@material-table/core';
 import { Plus, Trash } from '@tamagui/lucide-icons';
 import { format } from 'date-fns';
 import { memo, useMemo, useState } from 'react';
-import { Button, SizableText, XStack } from 'tamagui';
+import { Button, SizableText, XStack, YStack } from 'tamagui';
 
 import AddStoreItemForm from './AddStoreItemForm';
 import MaterialTable from './MaterialTable';
 
 import { useStoreItemProviderContext } from '@/context-providers/StoreItemsProvider';
 import { StoreItem } from '@/types/list';
+import FormBottomSheet from './FormBottomSheet';
 
 const StoreItemTable = () => {
-    const { selectedStoreItems, selectedStoreId, handleRemoveListItem, selectedStoreName } =
+    const { selectedStoreItems, selectedStoreId, handleRemoveStoreItem, selectedStoreName } =
         useStoreItemProviderContext();
     const [itemToEdit, setItemToEdit] = useState<StoreItem>();
 
@@ -21,21 +22,21 @@ const StoreItemTable = () => {
                 icon: () => <Trash color="$red10" size="$1" />,
                 onClick: async (event: unknown, rowData: StoreItem | StoreItem[]) => {
                     if (!Array.isArray(rowData))
-                        await handleRemoveListItem(rowData.item_id).catch((e) =>
+                        await handleRemoveStoreItem(rowData.item_id).catch((e) =>
                             console.log({ error: e }),
                         );
                 },
                 tooltip: 'Delete Item?',
             },
         ],
-        [handleRemoveListItem],
+        [handleRemoveStoreItem],
     );
     if (!selectedStoreId) {
         return null;
     }
 
     return (
-        <>
+        <YStack flex={1}>
             <MaterialTable
                 loading={!selectedStoreItems}
                 data={selectedStoreItems ?? []}
@@ -48,6 +49,7 @@ const StoreItemTable = () => {
                             icon={<Plus />}
                             onPress={() =>
                                 setItemToEdit({
+                                    store_section: 'Miscellaneous',
                                     store_id: selectedStoreId,
                                     price_type: 'count',
                                     item_name: '',

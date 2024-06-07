@@ -13,13 +13,14 @@ import invariant from 'tiny-invariant';
 
 import { useSelectedList } from './ListProvider';
 
+import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import {
     getListItemsForStore,
     getListItemsWithData,
     handleRemoveSupabaseRow,
     updateListItem,
 } from '@/modules/supabase-list-utils';
-import { LIST_ITEMS, ListItem, ListItemWithData } from '@/types/list';
+import { LIST_ITEMS, ListItem, ListItemWithData, StoreItem, StoreSection } from '@/types/list';
 import { upsertIntoArray } from '@/utils/array-utils';
 
 export interface ListItemsProviderContextValues {
@@ -27,12 +28,13 @@ export interface ListItemsProviderContextValues {
     handleRemoveListItem: (itemToRemoveId: number) => Promise<void>;
     itemsWithCost: ListItemWithData[] | undefined;
     setItemsWithCost: Dispatch<SetStateAction<ListItemWithData[] | undefined>>;
-    handleUpdateListItem: (itemToUpdate: ListItemWithData) => Promise<ListItemWithData>;
+    handleUpdateListItem: (itemToUpdate: InitialListItemFormValue) => Promise<ListItemWithData>;
     listItemsLoading: boolean;
     unCheckedItems: ListItemWithData[] | undefined;
     setUncheckedItems: Dispatch<SetStateAction<ListItemWithData[] | undefined>>;
     checkedItems: ListItemWithData[] | undefined;
     setCheckedItems: Dispatch<SetStateAction<ListItemWithData[] | undefined>>;
+    setListItemsLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 export const ListItemsProviderContext = createContext<ListItemsProviderContextValues | null>(null);
@@ -55,8 +57,10 @@ export const ListItemsProvider = ({
         const sortedItems = itemsWithCost?.sort((a, b) => a.list_order - b.list_order);
         // lodash groupBy
         const groupedItems = groupBy(sortedItems, 'completed');
-        setCheckedItems(groupedItems['true'] ?? []);
-        setUncheckedItems(groupedItems['false'] ?? []);
+        console.log('reset unchecked items');
+        setCheckedItems(sortItemsBySection(groupedItems['true']) ?? []);
+        setUncheckedItems(sortItemsBySection(groupedItems['false']) ?? []);
+        setListItemsLoading(false);
     }, [itemsWithCost]);
 
     useEffect(() => {
@@ -87,7 +91,7 @@ export const ListItemsProvider = ({
         }
     }, [list?.store_id, list?.user_id]);
 
-    const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
+    const handleUpdateListItem = useCallback(async (itemToUpdate: InitialListItemFormValue) => {
         return updateListItem(itemToUpdate)
             .then((updatedItem) => {
                 setItemsWithCost((prev) =>
@@ -126,6 +130,7 @@ export const ListItemsProvider = ({
             setCheckedItems,
             setUncheckedItems,
             unCheckedItems,
+            setListItemsLoading,
         };
     }, [
         allStoreItemsWithCost,
@@ -151,3 +156,27 @@ export const useListItemsProviderContext = () => {
 
     return ctx;
 };
+
+export function sortItemsBySection<T extends object>(
+    listItems: T[],
+    listOrder?: StoreSection[],
+): T[] {
+    const defaultOrder: StoreSection[] = listOrder ?? [
+        'Produce',
+        'Bulk',
+        'Meat/Deli',
+        'Dairy/Eggs',
+        'Frozen',
+        'Toiletries/Paper Products/Cleaning Supplies',
+        'Non-perishable',
+        'Miscellaneous',
+    ];
+    const groupedItems: Record<StoreSection, T[]> = groupBy(listItems, 'store_section') as Record<
+        StoreSection,
+        T[]
+    >;
+
+    return defaultOrder.reduce((orderedList, sectionKey) => {
+        return orderedList.concat(groupedItems?.[sectionKey] ?? []);
+    }, [] as T[]);
+}

@@ -1,7 +1,7 @@
-import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
 import { InitialListItemFormValue } from './add-list-item-validation';
 import { supabase } from './supabase';
 
+import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
 import { ITEMS, LISTS, LIST_ITEMS, List, ListItemWithData, Store, StoreItem } from '@/types/list';
 import { Database, ExistingTables, InsertType, RowType } from '@/types/supabase';
 
@@ -18,7 +18,7 @@ export const addListToTable = async (storeId: number, listName: string) => {
     }
 };
 
-export const addListItem = async (
+export const updateListItem = async (
     itemData: InitialListItemFormValue,
 ): Promise<ListItemWithData> => {
     const {
@@ -31,7 +31,11 @@ export const addListItem = async (
         user_id,
         item_id,
         list_order,
+        store_section,
+        list_item_id,
+        completed,
     } = itemData;
+    console.log('store section in addListItem', { store_section });
     return handleSupabaseInsertRow(
         {
             store_id,
@@ -40,17 +44,20 @@ export const addListItem = async (
             price_type,
             user_id,
             item_id,
+            store_section,
         },
         ITEMS,
     )
         .then(async (itemAddedToStore) => {
             return handleSupabaseInsertRow(
                 {
+                    list_item_id,
                     list_id,
                     item_id: itemAddedToStore.item_id,
                     quantity: parseFloat(quantity),
                     user_id,
                     list_order,
+                    completed,
                 },
                 LIST_ITEMS,
             )
@@ -64,7 +71,7 @@ export const addListItem = async (
 
 export const addStoreItem = async (itemData: ItemFormInitialValues): Promise<StoreItem> => {
     try {
-        const { store_id, item_name, price, price_type, item_id } = itemData;
+        const { store_id, item_name, price, price_type, item_id, store_section } = itemData;
 
         return handleSupabaseInsertRow(
             {
@@ -73,6 +80,7 @@ export const addStoreItem = async (itemData: ItemFormInitialValues): Promise<Sto
                 price: parseFloat(`${price}` ?? '0'),
                 price_type,
                 item_id,
+                store_section,
             },
             ITEMS,
         ).then(async (itemAddedToStore) => {
@@ -170,52 +178,6 @@ export const getItemsForStores = async () => {
         .select(`*`)
         .then(({ data, error }) => {
             return data ? Promise.resolve(data as StoreItem[]) : Promise.reject(error);
-        });
-};
-
-export const updateListItem = async (itemData: ListItemWithData) => {
-    const {
-        store_id,
-        item_name,
-        price,
-        price_type,
-        list_id,
-        quantity,
-        user_id,
-        list_item_id,
-        item_id,
-        completed,
-    } = itemData;
-    return handleUpdateSupabaseRow(
-        { store_id, item_name, price, price_type, user_id, item_id },
-        'item_id',
-        item_id ?? '',
-        ITEMS,
-    )
-        .then(async (itemAddedToStore) => {
-            return handleUpdateSupabaseRow(
-                {
-                    list_id,
-                    item_id: itemAddedToStore.item_id,
-                    quantity,
-                    user_id,
-                    list_item_id,
-                    completed,
-                },
-                'list_item_id',
-                list_item_id ?? '',
-                LIST_ITEMS,
-            )
-                .then((listItem) => {
-                    return Promise.resolve({
-                        ...itemAddedToStore,
-                        ...listItem,
-                    } as ListItemWithData);
-                })
-                .catch((e) => Promise.reject(e));
-        })
-        .catch((e) => {
-            return Promise.reject(e);
         });
 };
 

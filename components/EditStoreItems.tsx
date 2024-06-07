@@ -1,33 +1,28 @@
-import { StyleSheet } from 'react-native';
+import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
+import { Formik } from 'formik';
+import { H3, YStack } from 'tamagui';
 
-import { Text, View } from '@/components/Themed';
+import StoreItemTable from './StoreItemTable';
+import StoreSelector from './StoreSelector';
 
 export default function EditStoreItems() {
     return (
-        <View style={initialScreenStyles.container}>
-            <Text style={initialScreenStyles.title}>Coming soon...</Text>
-            <View
-                style={initialScreenStyles.separator}
-                lightColor="#eee"
-                darkColor="rgba(255,255,255,0.1)"
-            />
-        </View>
+        <YStack
+            margin="$4"
+            marginTop="$2"
+            height={WINDOW_HEIGHT}
+            flex={1}
+            $gtSm={{
+                alignSelf: 'center',
+                width: '65%',
+            }}
+            gap="$3"
+        >
+            <H3 marginTop="$4">Manage items for a store </H3>
+            <Formik initialValues={{ store_id: undefined }} onSubmit={() => {}}>
+                <StoreSelector />
+            </Formik>
+            <StoreItemTable />
+        </YStack>
     );
 }
-
-export const initialScreenStyles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    separator: {
-        marginVertical: 30,
-        height: 1,
-        width: '80%',
-    },
-});

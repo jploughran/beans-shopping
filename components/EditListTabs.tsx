@@ -1,12 +1,10 @@
 import { ListPlus } from '@tamagui/lucide-icons';
 import { useState, useCallback, memo } from 'react';
-import DraggableFlatList, {
-    DragEndParams,
-    RenderItemParams,
-} from 'react-native-draggable-flatlist';
-import { Button, H5, Separator, SizableText, Tabs } from 'tamagui';
+import { RenderItemParams } from 'react-native-draggable-flatlist';
+import { Button, H5, Separator, Tabs } from 'tamagui';
 
 import { AddListItemForm } from './AddListItemForm';
+import DraggableList from './DraggableList';
 import FormBottomSheet from './FormBottomSheet';
 import LoadingView from './LoadingView';
 import StoreListItem from './StoreListItem';
@@ -18,31 +16,11 @@ import { handleSupabaseUpsert } from '@/modules/supabase-list-utils';
 import { ListItemWithData } from '@/types/list';
 
 const EditListTabs = () => {
-    const {
-        handleUpdateListItem,
-        setItemsWithCost,
-        checkedItems,
-        unCheckedItems,
-        setCheckedItems,
-        setUncheckedItems,
-    } = useListItemsProviderContext();
+    const { setItemsWithCost, checkedItems, unCheckedItems, setCheckedItems, setUncheckedItems } =
+        useListItemsProviderContext();
 
     const { handleOpenPress } = useBottomSheetProviderContext();
     const [itemToEdit, setItemToEdit] = useState<InitialListItemFormValue>();
-
-    const handleSubmit = useCallback(
-        async (formValues: InitialListItemFormValue) => {
-            const valuesToSubmit = {
-                ...formValues,
-                description: '',
-                price: parseFloat(formValues.price ?? '0'),
-                quantity: parseFloat(formValues.quantity ?? '0'),
-            } as ListItemWithData;
-            console.log(`handleSubmit called`, { valuesToSubmit });
-            await handleUpdateListItem(valuesToSubmit);
-        },
-        [handleUpdateListItem],
-    );
 
     const handleDragEnd = useCallback(
         async (
@@ -72,7 +50,7 @@ const EditListTabs = () => {
 
     const renderItem = useCallback(
         (props: RenderItemParams<ListItemWithData>) => (
-            <StoreListItem {...props} setItemToEdit={setItemToEdit} />
+            <StoreListItem {...props} key={props.item.list_item_id} setItemToEdit={setItemToEdit} />
         ),
         [],
     );
@@ -122,38 +100,10 @@ const EditListTabs = () => {
                 </LoadingView>
             </Tabs.Content>
             <FormBottomSheet>
-                <AddListItemForm
-                    itemToEdit={itemToEdit}
-                    handleFormSubmit={itemToEdit ? handleSubmit : undefined}
-                />
+                <AddListItemForm itemToEdit={itemToEdit} />
             </FormBottomSheet>
         </Tabs>
     );
 };
 
 export default memo(EditListTabs);
-
-const DraggableList = ({
-    listItems,
-    handleDragEnd,
-    renderItem,
-}: {
-    listItems: ListItemWithData[] | undefined;
-    handleDragEnd: ((params: DragEndParams<ListItemWithData>) => void) | undefined;
-    renderItem: (props: RenderItemParams<ListItemWithData>) => React.JSX.Element;
-}) => {
-    return (
-        <DraggableFlatList
-            data={listItems ?? []}
-            onDragEnd={handleDragEnd}
-            keyExtractor={(item, i) => item.list_item_id + item.item_name}
-            showsVerticalScrollIndicator={false}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <SizableText marginVertical="$8" size="$4" alignSelf="center">
-                    Please add some items to get started...
-                </SizableText>
-            }
-        />
-    );
-};
