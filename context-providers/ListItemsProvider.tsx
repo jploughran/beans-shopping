@@ -52,6 +52,8 @@ export const ListItemsProvider = ({
     const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
+    console.log({ unCheckedItems });
+
     useEffect(() => {
         // sort
         const sortedItems = itemsWithCost?.sort((a, b) => a.list_order - b.list_order);
