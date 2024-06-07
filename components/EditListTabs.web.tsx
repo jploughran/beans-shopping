@@ -100,11 +100,9 @@ const EditListTabs = () => {
                     renderItem={renderItem}
                 />
             </Tabs.Content>
-            <BottomSheetProvider>
-                <FormBottomSheet>
-                    <AddListItemForm itemToEdit={itemToEdit} />
-                </FormBottomSheet>
-            </BottomSheetProvider>
+            <FormBottomSheet>
+                <AddListItemForm itemToEdit={itemToEdit} />
+            </FormBottomSheet>
         </Tabs>
     );
 };

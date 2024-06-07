@@ -10,7 +10,7 @@ import { STORE_SECTIONS, StoreSection } from '@/types/list';
 
 export function StoreSectionSelector() {
     return (
-        <XStack ai="center" gap="$4" w="100%">
+        <XStack ai="center" w="100%" justifyContent="space-between">
             <InputLabel label="Section" />
             <SectionSelect id="select-demo-1" />
         </XStack>
@@ -27,7 +27,7 @@ const SectionSelect = (props: SelectProps) => {
             disablePreventBodyScroll
             {...props}
         >
-            <Select.Trigger f={4} iconAfter={ChevronDown}>
+            <Select.Trigger iconAfter={ChevronDown} style={{ flex: 5 }}>
                 <Select.Value placeholder="Miscellaneous" />
             </Select.Trigger>
             <Adapt>

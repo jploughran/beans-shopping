@@ -20,8 +20,6 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
     const { handleUpdateListItem, handleRemoveListItem } = useListItemsProviderContext();
     const { handleOpenPress } = useBottomSheetProviderContext();
 
-    console.log({ itemsection: item.store_section });
-
     const handleChangeChecked = useCallback(
         async (checked: CheckedState) => {
             if (checked) {
@@ -51,8 +49,6 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
         });
         handleOpenPress();
     }, [handleOpenPress, item, setItemToEdit]);
-
-    console.log('color', sectionColorDictionary[item.store_section]);
 
     return (
         <Swipeable

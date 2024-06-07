@@ -36,7 +36,7 @@ const StoreItemTable = () => {
     }
 
     return (
-        <YStack flex={1}>
+        <>
             <MaterialTable
                 loading={!selectedStoreItems}
                 data={selectedStoreItems ?? []}

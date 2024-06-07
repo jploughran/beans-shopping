@@ -1,13 +1,15 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Formik, useField } from 'formik';
-import { memo, useMemo, useState } from 'react';
+import { memo, useState } from 'react';
 import { KeyboardTypeOptions } from 'react-native';
 import { Button, Input, SizableText, ToggleGroup, XStack, YStack } from 'tamagui';
 
 import FormErrorText from './FormErrorText';
 import InputLabel from './InputLabel';
 import LoadingView from './LoadingView';
+import StoreSectionSelector from './StoreSectionSelector';
 
+import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useStoreItemProviderContext } from '@/context-providers/StoreItemsProvider';
 import {
     InitialListItemFormValue,
@@ -18,101 +20,109 @@ import { StoreItem } from '@/types/list';
 export interface ItemFormInitialValues extends Partial<StoreItem> {}
 
 interface Props {
-    closeForm: () => void;
-    itemToEdit: StoreItem;
+    itemToEdit: StoreItem | undefined;
+    closeForm?: () => void;
 }
 
-function AddStoreItemForm({ itemToEdit, closeForm }: Props) {
+function AddStoreItemForm({ itemToEdit }: Props) {
     const { handleUpdateStoreItem } = useStoreItemProviderContext();
     const [loading, setLoading] = useState(false);
+    const { handleClosePress } = useBottomSheetProviderContext();
+
+    console.log('rendering AddStoreItemForm', { itemToEdit });
+    if (!itemToEdit) {
+        return null;
+    }
 
     return (
-        <Dialog open onClose={() => closeForm()} fullWidth maxWidth="sm">
-            <DialogTitle>Edit Item</DialogTitle>
-
-            <Formik
-                initialValues={itemToEdit}
-                validationSchema={newStoreItemValidationSchema}
-                onSubmit={async (formValues, { resetForm }) => {
-                    setLoading(true);
-                    await handleUpdateStoreItem(formValues).then(() => {
-                        setLoading(false);
-                        resetForm();
-                        closeForm();
-                    });
-                }}
-                validateOnMount
-                enableReinitialize
-            >
-                {({ values, errors, setFieldValue, handleSubmit, isValid }) => (
+        <Formik
+            initialValues={itemToEdit}
+            validationSchema={newStoreItemValidationSchema}
+            onSubmit={async (formValues, { resetForm }) => {
+                setLoading(true);
+                await handleUpdateStoreItem(formValues).then(() => {
+                    setLoading(false);
+                    resetForm();
+                    handleClosePress();
+                });
+            }}
+            validateOnMount
+            enableReinitialize
+        >
+            {({ values, errors, setFieldValue, handleSubmit, isValid }) => (
+                <BottomSheetView style={{ flex: 1 }}>
                     <LoadingView
                         loading={loading}
                         message="Saving..."
-                        style={{ justifyContent: 'center', marginVertical: 20 }}
+                        style={{ justifyContent: 'flex-start', marginTop: '20%' }}
                     >
-                        <>
-                            <DialogContent>
-                                <YStack gap="$4">
-                                    <XStack gap="$3" width="100%" alignItems="center">
-                                        <InputLabel label="Name" />
-                                        <InputField
-                                            fieldName="item_name"
-                                            placeholder="Enter name here..."
-                                            keyboardType="default"
-                                        />
-                                    </XStack>
-                                    <XStack
-                                        width="100%"
-                                        alignItems="center"
-                                        justifyContent="flex-start"
-                                    >
-                                        <InputLabel label="Price Type" />
-                                        <ToggleGroup
-                                            flex={4}
-                                            orientation="horizontal"
-                                            id="price_type"
-                                            type="single"
-                                            size="$1"
-                                            disableDeactivation
-                                            value={values.price_type ?? undefined}
-                                            onValueChange={(type) =>
-                                                setFieldValue('price_type', type)
-                                            }
-                                        >
-                                            <ToggleGroup.Item
-                                                value="weight"
-                                                aria-label="Left aligned"
-                                            >
-                                                <SizableText>Weight</SizableText>
-                                            </ToggleGroup.Item>
-                                            <ToggleGroup.Item
-                                                value="count"
-                                                aria-label="Center aligned"
-                                            >
-                                                <SizableText>Count</SizableText>
-                                            </ToggleGroup.Item>
-                                        </ToggleGroup>
-                                    </XStack>
-                                    <XStack gap="$3" width="100%" alignItems="center">
-                                        <InputLabel label="Price/item" />
-                                        <InputField
-                                            fieldName="price"
-                                            placeholder="Enter price (estimated) here..."
-                                            keyboardType="numeric"
-                                        />
-                                    </XStack>
-                                    <FormErrorText errors={errors} />
-                                </YStack>
-                            </DialogContent>
-                            <DialogActions>
+                        <YStack
+                            gap="$3"
+                            flex={1}
+                            padding="$1"
+                            marginTop="$2"
+                            $gtSm={{
+                                alignSelf: 'center',
+                                width: '48%',
+                                borderWidth: '$0.5',
+                                borderColor: '$green6',
+                                borderRadius: '$4',
+                                padding: '$4',
+                                backgroundColor: '$green1',
+                            }}
+                        >
+                            <XStack gap="$3" width="100%" alignItems="center">
+                                <InputLabel label="Name" />
+                                <InputField
+                                    fieldName="item_name"
+                                    placeholder="Enter name here..."
+                                    keyboardType="default"
+                                />
+                            </XStack>
+                            <XStack
+                                gap="$2.5"
+                                width="100%"
+                                alignItems="center"
+                                justifyContent="flex-start"
+                            >
+                                <InputLabel label="Price Type" />
+                                <ToggleGroup
+                                    flex={4}
+                                    orientation="horizontal"
+                                    id="price_type"
+                                    type="single"
+                                    size="$1"
+                                    disableDeactivation
+                                    value={values.price_type ?? undefined}
+                                    onValueChange={(type) => setFieldValue('price_type', type)}
+                                >
+                                    <ToggleGroup.Item value="weight" aria-label="Left aligned">
+                                        <SizableText>Weight</SizableText>
+                                    </ToggleGroup.Item>
+                                    <ToggleGroup.Item value="count" aria-label="Center aligned">
+                                        <SizableText>Count</SizableText>
+                                    </ToggleGroup.Item>
+                                </ToggleGroup>
+                            </XStack>
+
+                            <XStack gap="$3" width="100%" alignItems="center">
+                                <InputLabel label="Price/item" />
+                                <InputField
+                                    fieldName="price"
+                                    placeholder="Enter price (estimated) here..."
+                                    keyboardType="numeric"
+                                />
+                            </XStack>
+                            <StoreSectionSelector />
+
+                            <XStack gap="$4" justifyContent="flex-end">
                                 <Button
                                     minWidth={100}
-                                    marginRight="$4"
                                     variant="outlined"
                                     borderWidth="$0.25"
                                     size="$3"
                                     onPress={() => {
-                                        closeForm();
+                                        handleClosePress();
                                     }}
                                 >
                                     Close
@@ -129,12 +139,13 @@ function AddStoreItemForm({ itemToEdit, closeForm }: Props) {
                                 >
                                     Submit
                                 </Button>
-                            </DialogActions>
-                        </>
+                            </XStack>
+                            <FormErrorText errors={errors} />
+                        </YStack>
                     </LoadingView>
-                )}
-            </Formik>
-        </Dialog>
+                </BottomSheetView>
+            )}
+        </Formik>
     );
 }
 
