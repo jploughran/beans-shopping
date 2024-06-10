@@ -3,7 +3,7 @@ import { Formik } from 'formik';
 import { memo, useState } from 'react';
 import { Alert, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { YStack, Spinner, SizableText, View, H3, Image } from 'tamagui';
+import { YStack, Spinner, SizableText, View, H3, Image, Button } from 'tamagui';
 // import { useUserProviderContext } from '@/context-providers/UserProvider';
 
 import logo from '@/assets/images/BeanLogo.png';
@@ -44,8 +44,12 @@ const SignUp = () => {
                         });
 
                         if (error) Alert.alert(error.message);
-                        if (!session) {
-                            Alert.alert('Please check your inbox for email verification!');
+                        if (!session && !error) {
+                            Alert.alert(
+                                'Please check your inbox for email verification!',
+                                undefined,
+                                [{ text: 'Sign In', onPress: () => router.back() }],
+                            );
                         }
                         setLoading(false);
                     }}
@@ -73,7 +77,16 @@ const SignUp = () => {
                                     placeholder="Confirm password..."
                                     field="confirmPassword"
                                 />
-                                <SubmitButton />
+                                <SubmitButton title="Sign Up" />
+                                <Button
+                                    borderWidth="$0.5"
+                                    backgroundColor="$green2"
+                                    size="$4"
+                                    onPress={() => router.back()}
+                                    variant="outlined"
+                                >
+                                    Back to Sign In
+                                </Button>
                             </>
                         )}
                     </YStack>
