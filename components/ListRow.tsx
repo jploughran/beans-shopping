@@ -5,7 +5,6 @@ import { ListItem } from 'tamagui';
 
 import DeleteFromListButton from './DeleteFromListButton';
 
-import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
 import { useListsProviderContext } from '@/context-providers/ListProvider';
 import { List } from '@/types/list';
 
@@ -15,7 +14,6 @@ interface Props {
 
 const ListRow = ({ list }: Props) => {
     const { setSelectedList, handleRemoveList } = useListsProviderContext();
-    const { setListItemsLoading } = useListItemsProviderContext();
 
     return (
         <Swipeable
@@ -35,10 +33,9 @@ const ListRow = ({ list }: Props) => {
                 height="$5"
                 pressTheme
                 onPress={() => {
+                    router.push('/edit-list');
                     console.log({ name: list.list_name });
                     setSelectedList(list);
-                    setListItemsLoading(true);
-                    router.push('/edit-list');
                 }}
             />
         </Swipeable>
