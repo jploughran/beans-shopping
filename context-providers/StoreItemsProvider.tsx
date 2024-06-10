@@ -2,6 +2,7 @@ import { groupBy } from 'lodash';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import invariant from 'tiny-invariant';
 
+import { sortItemsBySection } from './ListItemsProvider';
 import { useSelectedList } from './ListProvider';
 
 import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
@@ -12,7 +13,6 @@ import {
 } from '@/modules/supabase-list-utils';
 import { ITEMS, StoreItem } from '@/types/list';
 import { upsertIntoArray } from '@/utils/array-utils';
-import { sortItemsBySection } from './ListItemsProvider';
 
 export interface StoreItemContextProvider {
     selectedStoreItems: StoreItem[] | undefined;
@@ -48,7 +48,13 @@ export const StoreItemProvider = ({
         if (!selectedStoreId || !allStoreItems) {
             return undefined;
         }
-        return [...(sortItemsBySection(allStoreItems[selectedStoreId]) ?? [])];
+        return [
+            ...(sortItemsBySection(
+                allStoreItems[selectedStoreId]?.sort((a, b) =>
+                    a.item_name.localeCompare(b.item_name),
+                ) ?? [],
+            ) ?? []),
+        ];
     }, [allStoreItems, selectedStoreId]);
 
     useEffect(() => {

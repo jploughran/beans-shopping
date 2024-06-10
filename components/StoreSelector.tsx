@@ -4,9 +4,9 @@ import Fuse, { IFuseOptions } from 'fuse.js';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Input, Label, ListItem, ScrollView, XStack, YStack } from 'tamagui';
 
+import { useStoreItemProviderContext } from '@/context-providers/StoreItemsProvider';
 import { getStores } from '@/modules/supabase-list-utils';
 import { Store } from '@/types/list';
-import { useStoreItemProviderContext } from '@/context-providers/StoreItemsProvider';
 
 const fuseOptions: IFuseOptions<Store> = {
     minMatchCharLength: 2,
@@ -14,20 +14,30 @@ const fuseOptions: IFuseOptions<Store> = {
     keys: [{ name: 'storename', weight: 2.5 }],
 };
 
-interface Props {
-    manageStore?: boolean;
-}
+const StoreSelector = () => {
+    const { selectedStoreId } = useStoreItemProviderContext();
 
-const StoreSelector = ({ manageStore }: Props) => {
+    console.log({ selectedStoreId });
+
     const [stores, setStores] = useState<Store[]>([]);
     const [name, setName] = useState('');
 
     useEffect(() => {
         const fetchStores = async () => {
-            await getStores().then((fetchedStores) => setStores(fetchedStores));
+            await getStores().then((fetchedStores) => {
+                setStores(fetchedStores);
+                if (selectedStoreId) {
+                    const store = fetchedStores.find(
+                        ({ store_id }) => store_id === selectedStoreId,
+                    );
+                    if (store?.storename) {
+                        setName(store?.storename || '');
+                    }
+                }
+            });
         };
         fetchStores();
-    }, []);
+    }, [selectedStoreId]);
 
     const fuseList = useMemo(() => new Fuse(stores, fuseOptions), [stores]);
     return (
@@ -49,12 +59,7 @@ const StoreSelector = ({ manageStore }: Props) => {
                 <ScrollView horizontal flexDirection="row">
                     <XStack gap="$2">
                         {fuseList.search(name).map(({ item }) => (
-                            <StoreItem
-                                key={item.created_at}
-                                item={item}
-                                setName={setName}
-                                manageStore={manageStore}
-                            />
+                            <StoreItem key={item.created_at} item={item} setName={setName} />
                         ))}
                     </XStack>
                 </ScrollView>
@@ -68,16 +73,18 @@ export default memo(StoreSelector);
 const StoreItem = ({
     item,
     setName,
-    manageStore,
 }: {
     item: Store;
     setName: (value: React.SetStateAction<string>) => void;
-    manageStore?: boolean;
 }) => {
-    const { setSelectedStoreId, setSelectedStoreName } = useStoreItemProviderContext();
+    const { setSelectedStoreId, setSelectedStoreName, selectedStoreId } =
+        useStoreItemProviderContext();
     const [{ value: store_id }, , { setValue: setStoreId }] = useField<number>('store_id');
 
-    const isChosen = useMemo(() => store_id === item.store_id, [item.store_id, store_id]);
+    const isChosen = useMemo(
+        () => (store_id || selectedStoreId) === item.store_id,
+        [item.store_id, selectedStoreId, store_id],
+    );
 
     return (
         <ListItem

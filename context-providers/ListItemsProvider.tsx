@@ -20,7 +20,7 @@ import {
     handleRemoveSupabaseRow,
     updateListItem,
 } from '@/modules/supabase-list-utils';
-import { LIST_ITEMS, ListItem, ListItemWithData, StoreItem, StoreSection } from '@/types/list';
+import { LIST_ITEMS, ListItem, ListItemWithData, StoreSection } from '@/types/list';
 import { upsertIntoArray } from '@/utils/array-utils';
 
 export interface ListItemsProviderContextValues {
@@ -53,13 +53,17 @@ export const ListItemsProvider = ({
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
     useEffect(() => {
-        // sort
-        const sortedItems = itemsWithCost?.sort((a, b) => a.list_order - b.list_order);
-        // lodash groupBy
-        const groupedItems = groupBy(sortedItems, 'completed');
-        console.log('reset unchecked items');
-        setCheckedItems(sortItemsBySection(groupedItems['true']) ?? []);
-        setUncheckedItems(sortItemsBySection(groupedItems['false']) ?? []);
+        if (itemsWithCost) {
+            const sortedItems = sortItemsBySection(
+                itemsWithCost.sort((a, b) => a.item_name.localeCompare(b.item_name)),
+            );
+            const groupedItems = groupBy(sortedItems, 'completed');
+            setCheckedItems(groupedItems['true'] ?? []);
+            setUncheckedItems(groupedItems['false'] ?? []);
+        } else {
+            setCheckedItems([]);
+            setUncheckedItems([]);
+        }
         setListItemsLoading(false);
     }, [itemsWithCost]);
 

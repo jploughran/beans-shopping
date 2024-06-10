@@ -1,4 +1,4 @@
-import { List, Receipt, Salad, Settings } from '@tamagui/lucide-icons';
+import { List, Receipt, Settings } from '@tamagui/lucide-icons';
 import { Link, Tabs } from 'expo-router';
 import React from 'react';
 import { Button } from 'tamagui';
@@ -15,7 +15,7 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tabIconSelected,
                 // Disable the static render of the header on web
                 // to prevent a hydration error in React Navigation v6.
                 headerShown: useClientOnlyValue(false, true),
@@ -25,6 +25,7 @@ export default function TabLayout() {
                 name="index"
                 options={{
                     title: 'Lists',
+                    tabBarItemStyle: { marginBottom: 4 },
                     tabBarIcon: ({ color }) => <List color={color} />,
                     headerRight: () => (
                         <Link href="/modal" asChild>
@@ -35,9 +36,10 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen
-                name="previous-trips"
+                name="store-items"
                 options={{
                     title: 'Store Items',
+                    tabBarItemStyle: { marginBottom: 4 },
                     tabBarIcon: ({ color }) => <Receipt color={color} />,
                 }}
             />
