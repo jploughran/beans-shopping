@@ -10,7 +10,7 @@ import { StoreItem } from '@/types/list';
 
 const fuseOptions: IFuseOptions<StoreItem> = {
     minMatchCharLength: 2,
-    threshold: 0.1,
+    threshold: 0.15,
     keys: [{ name: 'item_name', weight: 2.5 }],
 };
 
@@ -23,15 +23,13 @@ const StoreItemsList = () => {
     );
 
     return itemName ? (
-        <XStack>
-            <ScrollView horizontal flexDirection="row">
-                <XStack gap="$2">
-                    {fuseList.search(itemName).map(({ item }, i) => {
-                        return <StoreItemRow item={item} key={item.created_at} />;
-                    })}
-                </XStack>
-            </ScrollView>
-        </XStack>
+        <ScrollView horizontal flexDirection="row" showsHorizontalScrollIndicator={false}>
+            <XStack gap="$2">
+                {fuseList.search(itemName).map(({ item }, i) => {
+                    return <StoreItemRow item={item} key={item.created_at} />;
+                })}
+            </XStack>
+        </ScrollView>
     ) : null;
 };
 
@@ -50,6 +48,12 @@ const StoreItemRow = ({ item }: { item: StoreItem }) => {
             title={item.item_name}
             subTitle={`$${item.price}`}
             flex={1}
+            enterStyle={{
+                scale: 0.5,
+                y: -10,
+                opacity: 0,
+            }}
+            animation="medium"
             paddingVertical="$2"
             paddingHorizontal="$3"
             borderRadius="$3"
