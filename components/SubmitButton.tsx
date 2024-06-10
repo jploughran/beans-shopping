@@ -6,7 +6,11 @@ import FormErrorText from './FormErrorText';
 
 import { NewUserInfoUI } from '@/modules/authenticate';
 
-const SubmitButton = () => {
+interface Props {
+    title?: string;
+}
+
+const SubmitButton = ({ title = 'Sign In' }: Props) => {
     const { handleSubmit, errors, dirty } = useFormikContext<NewUserInfoUI>();
     const hasErrors = !!Object.keys(errors).length;
     return (
@@ -20,7 +24,7 @@ const SubmitButton = () => {
                 color={hasErrors ? '$red7' : '$green10'}
                 backgroundColor={hasErrors ? '$unset' : '$green1'}
             >
-                Sign In
+                {title}
             </Button>
             <FormErrorText errors={errors} />
         </View>

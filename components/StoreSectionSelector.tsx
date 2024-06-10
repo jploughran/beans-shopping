@@ -1,6 +1,7 @@
 import { Check, ChevronDown } from '@tamagui/lucide-icons';
 import { useField } from 'formik';
 import { memo, useMemo } from 'react';
+import { Keyboard } from 'react-native';
 import type { SelectProps } from 'tamagui';
 import { Adapt, Select, Sheet, XStack } from 'tamagui';
 
@@ -10,7 +11,7 @@ import { STORE_SECTIONS, StoreSection } from '@/types/list';
 
 export function StoreSectionSelector() {
     return (
-        <XStack ai="center" w="100%" justifyContent="space-between">
+        <XStack gap="$3" w="100%" ai="center">
             <InputLabel label="Section" />
             <SectionSelect id="select-demo-1" />
         </XStack>
@@ -23,11 +24,14 @@ const SectionSelect = (props: SelectProps) => {
     return (
         <Select
             value={storeSection}
+            onOpenChange={(open) => {
+                Keyboard.dismiss();
+            }}
             onValueChange={(value) => setStoreSection(value as StoreSection)}
             disablePreventBodyScroll
             {...props}
         >
-            <Select.Trigger iconAfter={ChevronDown} style={{ flex: 5 }}>
+            <Select.Trigger iconAfter={ChevronDown} flex={4} pl="$2.5" ml="$1">
                 <Select.Value placeholder="Miscellaneous" />
             </Select.Trigger>
             <Adapt>
@@ -48,11 +52,7 @@ const SectionSelect = (props: SelectProps) => {
                         </Sheet.ScrollView>
                     </Sheet.Frame>
 
-                    <Sheet.Overlay
-                        animation="lazy"
-                        enterStyle={{ opacity: 0 }}
-                        exitStyle={{ opacity: 0 }}
-                    />
+                    <Sheet.Overlay enterStyle={{ opacity: 0 }} exitStyle={{ opacity: 0 }} />
                 </Sheet>
             </Adapt>
             <Select.Content zIndex={200000}>

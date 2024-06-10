@@ -53,7 +53,7 @@ const StoreItemTable = () => {
                         </SizableText>
                     }
                 />
-                <Button icon={ListPlus} marginVertical="$3" onPress={addStoreItem} />
+                <Button icon={ListPlus} onPress={addStoreItem} />
                 <FormBottomSheet>
                     {itemToEdit ? <AddStoreItemForm itemToEdit={itemToEdit} /> : null}
                 </FormBottomSheet>
