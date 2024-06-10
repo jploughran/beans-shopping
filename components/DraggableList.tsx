@@ -22,6 +22,7 @@ function DraggableList<T extends Partial<ListItemWithData>>({
         <DraggableFlatList
             data={listItems ?? []}
             onDragEnd={handleDragEnd}
+            keyExtractor={(item, i) => item.item_id + item.item_name + item.store_id + i}
             showsVerticalScrollIndicator={false}
             renderItem={renderItem}
             ListEmptyComponent={
