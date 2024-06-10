@@ -14,7 +14,7 @@ const FormBottomSheet = ({
         <BottomSheet
             ref={sheetRef}
             index={-1}
-            snapPoints={['65%', '98%']}
+            snapPoints={['85%', '98%']}
             enablePanDownToClose
             keyboardBlurBehavior="restore"
             keyboardBehavior="extend"
