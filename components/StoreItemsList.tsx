@@ -4,40 +4,43 @@ import Fuse, { IFuseOptions } from 'fuse.js';
 import { memo, useMemo } from 'react';
 import { ListItem, ScrollView, XStack } from 'tamagui';
 
-import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
+import { useStoreItemProviderContext } from '@/context-providers/StoreItemsProvider';
 import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
-import { ListItemWithData } from '@/types/list';
+import { StoreItem } from '@/types/list';
 
-const fuseOptions: IFuseOptions<ListItemWithData> = {
+const fuseOptions: IFuseOptions<StoreItem> = {
     minMatchCharLength: 2,
-    threshold: 0.1,
+    threshold: 0.15,
     keys: [{ name: 'item_name', weight: 2.5 }],
 };
 
 const StoreItemsList = () => {
-    const { allStoreItemsWithCost } = useListItemsProviderContext();
+    const { selectedStoreItems } = useStoreItemProviderContext();
     const [{ value: itemName }, ,] = useField<string>('item_name');
     const fuseList = useMemo(
-        () => new Fuse(allStoreItemsWithCost ?? [], fuseOptions),
-        [allStoreItemsWithCost],
+        () => new Fuse(selectedStoreItems ?? [], fuseOptions),
+        [selectedStoreItems],
     );
 
     return itemName ? (
-        <XStack>
-            <ScrollView horizontal flexDirection="row">
-                <XStack gap="$2">
-                    {fuseList.search(itemName).map(({ item }, i) => {
-                        return <StoreItem item={item} key={item.created_at} />;
-                    })}
-                </XStack>
-            </ScrollView>
-        </XStack>
+        <ScrollView
+            horizontal
+            flexDirection="row"
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+        >
+            <XStack gap="$2">
+                {fuseList.search(itemName).map(({ item }, i) => {
+                    return <StoreItemRow item={item} key={item.created_at} />;
+                })}
+            </XStack>
+        </ScrollView>
     ) : null;
 };
 
 export default memo(StoreItemsList);
 
-const StoreItem = ({ item }: { item: ListItemWithData }) => {
+const StoreItemRow = ({ item }: { item: StoreItem }) => {
     const { setValues, values } = useFormikContext<InitialListItemFormValue>();
 
     const isChosen = useMemo(() => values.item_id === item.item_id, [item.item_id, values.item_id]);
@@ -50,15 +53,21 @@ const StoreItem = ({ item }: { item: ListItemWithData }) => {
             title={item.item_name}
             subTitle={`$${item.price}`}
             flex={1}
+            enterStyle={{
+                scale: 0.5,
+                y: -10,
+                opacity: 0,
+            }}
+            animation="medium"
             paddingVertical="$2"
             paddingHorizontal="$3"
             borderRadius="$3"
             onPress={() => {
-                setValues({
+                setValues((prev) => ({
+                    ...prev,
                     ...item,
-                    quantity: '1',
                     price: item.price?.toString() ?? '0',
-                });
+                }));
             }}
         />
     );

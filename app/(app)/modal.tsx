@@ -1,19 +1,20 @@
-import Constants from 'expo-constants';
-import { SizableText } from 'tamagui';
+import { SizableText, YStack } from 'tamagui';
+
 import { expo } from '../../app.json';
 
-import { initialScreenStyles } from './(tabs)/previousTrips';
-
 import { SignOutButton } from '@/components/SignOutButton';
-import { View } from '@/components/Themed';
+import { useUserProviderContext } from '@/context-providers/UserProvider';
 
 export const APP_VERSION = expo.version;
 
 export default function ModalScreen() {
+    const { session } = useUserProviderContext();
     return (
-        <View style={initialScreenStyles.container}>
+        <YStack flex={1} ai="center" jc="center">
+            <SizableText marginBottom="$4">User: {session?.user.email}</SizableText>
+
             <SizableText marginBottom="$4">Version: {APP_VERSION}</SizableText>
             <SignOutButton />
-        </View>
+        </YStack>
     );
 }

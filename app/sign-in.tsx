@@ -75,6 +75,8 @@ const SignIn = () => {
                                     <Button
                                         size="$3"
                                         variant="outlined"
+                                        borderWidth="$0.5"
+                                        backgroundColor="$green2"
                                         onPress={() => router.push('/sign-up')}
                                     >
                                         Sign Up Now

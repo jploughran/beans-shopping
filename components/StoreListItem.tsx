@@ -1,15 +1,15 @@
-import { Check, Component, GripVertical, MoreVertical, Trash } from '@tamagui/lucide-icons';
-import { memo, useCallback, useState } from 'react';
+import { Check, GripVertical } from '@tamagui/lucide-icons';
+import { memo, useCallback } from 'react';
 import { RenderItemParams } from 'react-native-draggable-flatlist';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { ListItem, XStack, Checkbox, Label, CheckedState, Button } from 'tamagui';
+import { ListItem, XStack, Checkbox, Label, CheckedState, Theme, ThemeName } from 'tamagui';
 
-import LoadingView from './LoadingView';
+import DeleteFromListButton from './DeleteFromListButton';
 
 import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
 import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
-import { ListItemWithData } from '@/types/list';
+import { ListItemWithData, StoreSection } from '@/types/list';
 
 interface Props extends RenderItemParams<ListItemWithData> {
     item: ListItemWithData;
@@ -17,7 +17,7 @@ interface Props extends RenderItemParams<ListItemWithData> {
 }
 
 const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
-    const { handleUpdateListItem } = useListItemsProviderContext();
+    const { handleUpdateListItem, handleRemoveListItem } = useListItemsProviderContext();
     const { handleOpenPress } = useBottomSheetProviderContext();
 
     const handleChangeChecked = useCallback(
@@ -35,7 +35,7 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
                 await handleUpdateListItem({
                     ...item,
                     completed: checked,
-                } as ListItemWithData);
+                });
             }
         },
         [handleOpenPress, handleUpdateListItem, item, setItemToEdit],
@@ -53,73 +53,81 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
     return (
         <Swipeable
             leftThreshold={20}
-            renderRightActions={() => <DeleteButton itemId={item.list_item_id} />}
+            renderRightActions={() => (
+                <DeleteFromListButton
+                    itemId={item.list_item_id}
+                    handleRemoveItem={handleRemoveListItem}
+                />
+            )}
             containerStyle={{ alignContent: 'center', flex: 1, justifyContent: 'center' }}
         >
-            <ListItem borderRadius="$4" marginTop="$2" paddingVertical="$1" paddingHorizontal="$0">
-                <XStack
-                    alignItems="center"
-                    gap="$4"
-                    width="100%"
-                    paddingRight="$4"
-                    backgroundColor={isActive ? '$green4' : '$green2'}
+            <Theme name={sectionColorDictionary[item.store_section]}>
+                <ListItem
+                    borderRadius="$4"
+                    marginTop="$2"
+                    paddingVertical="$1"
+                    paddingHorizontal="$0"
                 >
-                    <XStack alignItems="center" gap="$2">
-                        <XStack onPressIn={drag} paddingHorizontal="$2">
-                            <GripVertical color="$green7" size="$1.5" />
-                        </XStack>
-
-                        <Checkbox
-                            size="$4"
-                            checked={item.completed}
-                            onCheckedChange={handleChangeChecked}
-                        >
-                            <Checkbox.Indicator>
-                                <Check />
-                            </Checkbox.Indicator>
-                        </Checkbox>
-                    </XStack>
                     <XStack
                         alignItems="center"
                         gap="$4"
-                        justifyContent="space-between"
-                        flexGrow={1}
-                        onPress={handleLongPress}
-                        pressStyle={{ backgroundColor: '$green4' }}
+                        width="100%"
+                        paddingRight="$4"
+                        backgroundColor={
+                            isActive
+                                ? '$' + sectionColorDictionary[item.store_section] + '4'
+                                : '$' + sectionColorDictionary[item.store_section] + '3'
+                        }
                     >
-                        <Label onPress={handleLongPress}>{item.item_name}</Label>
-                        <Label>
-                            {item.price && item.quantity
-                                ? `$${(item?.price * item?.quantity).toFixed(2)}`
-                                : undefined}
-                        </Label>
+                        <XStack alignItems="center" gap="$2">
+                            <XStack onPressIn={drag} paddingHorizontal="$2">
+                                <GripVertical
+                                    color={'$' + sectionColorDictionary[item.store_section] + '7'}
+                                    size="$1.5"
+                                />
+                            </XStack>
+
+                            <Checkbox
+                                size="$4"
+                                checked={item.completed}
+                                onCheckedChange={handleChangeChecked}
+                            >
+                                <Checkbox.Indicator>
+                                    <Check />
+                                </Checkbox.Indicator>
+                            </Checkbox>
+                        </XStack>
+                        <XStack
+                            alignItems="center"
+                            gap="$4"
+                            justifyContent="space-between"
+                            flexGrow={1}
+                            onPress={handleLongPress}
+                            pressStyle={{ backgroundColor: '$green4' }}
+                        >
+                            <Label onPress={handleLongPress}>{item.item_name}</Label>
+                            <Label>
+                                {item.price && item.quantity
+                                    ? `$${(item?.price * item?.quantity).toFixed(2)}`
+                                    : undefined}
+                            </Label>
+                        </XStack>
                     </XStack>
-                </XStack>
-            </ListItem>
+                </ListItem>
+            </Theme>
         </Swipeable>
     );
 };
 
 export default memo(StoreListItem);
 
-const DeleteButton = ({ itemId }: { itemId: number }) => {
-    const { handleRemoveListItem } = useListItemsProviderContext();
-    const [loading, setLoading] = useState(false);
-
-    const handleDelete = useCallback(async () => {
-        setLoading(true);
-        await handleRemoveListItem(itemId).finally(() => setLoading(false));
-    }, [handleRemoveListItem, itemId]);
-
-    return (
-        <LoadingView message="" loading={loading}>
-            <Button
-                alignSelf="center"
-                icon={<Trash color="$red10" />}
-                onPress={handleDelete}
-                padding="$3"
-                chromeless
-            />
-        </LoadingView>
-    );
+const sectionColorDictionary: Record<StoreSection, ThemeName> = {
+    Produce: 'green',
+    Bulk: 'orange',
+    'Meat/Deli': 'red',
+    'Dairy/Eggs': 'yellow',
+    Frozen: 'blue',
+    'Toiletries/Paper Products/Cleaning Supplies': 'pink',
+    'Non-perishable': 'purple',
+    Miscellaneous: 'gray',
 };

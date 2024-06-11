@@ -13,7 +13,7 @@ import invariant from 'tiny-invariant';
 
 import { ListCreationType } from '@/components/AddListForm';
 import { supabase } from '@/modules/supabase';
-import { handleSupabaseInsertRow } from '@/modules/supabase-list-utils';
+import { handleRemoveSupabaseRow, handleSupabaseInsertRow } from '@/modules/supabase-list-utils';
 import { LISTS, List } from '@/types/list';
 
 export interface ListsProviderContextValues {
@@ -21,6 +21,7 @@ export interface ListsProviderContextValues {
     selectedList: List | undefined;
     setSelectedList: Dispatch<SetStateAction<List | undefined>>;
     handleAddList: (formValues: ListCreationType) => Promise<void>;
+    handleRemoveList: (itemToRemoveId: number) => Promise<void>;
 }
 
 export const ListsProviderContext = createContext<ListsProviderContextValues | null>(null);
@@ -53,9 +54,18 @@ export const ListsProvider = ({
         );
     }, []);
 
+    const handleRemoveList = useCallback(async (itemToRemoveId: number) => {
+        handleRemoveSupabaseRow<List>('list_id', itemToRemoveId, LISTS).then(() => {
+            setAllLists((prev) => {
+                const newItems = prev?.filter(({ list_id }) => list_id !== itemToRemoveId) ?? [];
+                return [...newItems];
+            });
+        });
+    }, []);
+
     const contextValue: ListsProviderContextValues = useMemo(() => {
-        return { allLists, selectedList, setSelectedList, handleAddList };
-    }, [allLists, selectedList, handleAddList]);
+        return { allLists, selectedList, setSelectedList, handleAddList, handleRemoveList };
+    }, [allLists, selectedList, handleAddList, handleRemoveList]);
 
     return (
         <ListsProviderContext.Provider value={contextValue}>

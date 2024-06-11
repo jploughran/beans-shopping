@@ -4,6 +4,7 @@ import Fuse, { IFuseOptions } from 'fuse.js';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Input, Label, ListItem, ScrollView, XStack, YStack } from 'tamagui';
 
+import { useStoreItemProviderContext } from '@/context-providers/StoreItemsProvider';
 import { getStores } from '@/modules/supabase-list-utils';
 import { Store } from '@/types/list';
 
@@ -14,15 +15,29 @@ const fuseOptions: IFuseOptions<Store> = {
 };
 
 const StoreSelector = () => {
+    const { selectedStoreId } = useStoreItemProviderContext();
+
+    console.log({ selectedStoreId });
+
     const [stores, setStores] = useState<Store[]>([]);
     const [name, setName] = useState('');
 
     useEffect(() => {
         const fetchStores = async () => {
-            await getStores().then((fetchedStores) => setStores(fetchedStores));
+            await getStores().then((fetchedStores) => {
+                setStores(fetchedStores);
+                if (selectedStoreId) {
+                    const store = fetchedStores.find(
+                        ({ store_id }) => store_id === selectedStoreId,
+                    );
+                    if (store?.storename) {
+                        setName(store?.storename || '');
+                    }
+                }
+            });
         };
         fetchStores();
-    }, []);
+    }, [selectedStoreId]);
 
     const fuseList = useMemo(() => new Fuse(stores, fuseOptions), [stores]);
     return (
@@ -62,9 +77,14 @@ const StoreItem = ({
     item: Store;
     setName: (value: React.SetStateAction<string>) => void;
 }) => {
+    const { setSelectedStoreId, setSelectedStoreName, selectedStoreId } =
+        useStoreItemProviderContext();
     const [{ value: store_id }, , { setValue: setStoreId }] = useField<number>('store_id');
 
-    const isChosen = useMemo(() => store_id === item.store_id, [item.store_id, store_id]);
+    const isChosen = useMemo(
+        () => (store_id || selectedStoreId) === item.store_id,
+        [item.store_id, selectedStoreId, store_id],
+    );
 
     return (
         <ListItem
@@ -75,6 +95,8 @@ const StoreItem = ({
             borderRadius="$3"
             pressTheme
             onPress={() => {
+                setSelectedStoreId(item.store_id);
+                setSelectedStoreName(item.storename);
                 setStoreId(item.store_id);
                 setName(item.storename);
             }}

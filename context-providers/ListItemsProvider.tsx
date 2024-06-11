@@ -13,43 +13,29 @@ import invariant from 'tiny-invariant';
 
 import { useSelectedList } from './ListProvider';
 
+import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import {
     getListItemsForStore,
     getListItemsWithData,
     handleRemoveSupabaseRow,
     updateListItem,
 } from '@/modules/supabase-list-utils';
-import { LIST_ITEMS, ListItem, ListItemWithData } from '@/types/list';
+import { LIST_ITEMS, ListItem, ListItemWithData, StoreSection } from '@/types/list';
+import { upsertIntoArray } from '@/utils/array-utils';
 
 export interface ListItemsProviderContextValues {
     allStoreItemsWithCost: ListItemWithData[] | undefined;
     handleRemoveListItem: (itemToRemoveId: number) => Promise<void>;
     itemsWithCost: ListItemWithData[] | undefined;
     setItemsWithCost: Dispatch<SetStateAction<ListItemWithData[] | undefined>>;
-    handleUpdateListItem: (itemToUpdate: ListItemWithData) => Promise<ListItemWithData>;
+    handleUpdateListItem: (itemToUpdate: InitialListItemFormValue) => Promise<ListItemWithData>;
     listItemsLoading: boolean;
     unCheckedItems: ListItemWithData[] | undefined;
     setUncheckedItems: Dispatch<SetStateAction<ListItemWithData[] | undefined>>;
     checkedItems: ListItemWithData[] | undefined;
     setCheckedItems: Dispatch<SetStateAction<ListItemWithData[] | undefined>>;
+    setListItemsLoading: Dispatch<SetStateAction<boolean>>;
 }
-
-const updateListItemInArray = (
-    list: ListItemWithData[] | undefined,
-    updatedItem: ListItemWithData,
-) => {
-    const newData =
-        list?.reduce((itemsToReturn, currentItem) => {
-            if (currentItem.list_item_id === updatedItem.list_item_id) {
-                itemsToReturn.push(updatedItem);
-            } else {
-                itemsToReturn.push(currentItem);
-            }
-            return itemsToReturn;
-        }, [] as ListItemWithData[]) ?? [];
-
-    return [...newData];
-};
 
 export const ListItemsProviderContext = createContext<ListItemsProviderContextValues | null>(null);
 
@@ -62,16 +48,23 @@ export const ListItemsProvider = ({
     const [listItemsLoading, setListItemsLoading] = useState(true);
     const list = useSelectedList();
     const [allStoreItemsWithCost, setAllStoreItemsWithCost] = useState<ListItemWithData[]>([]);
+
     const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
     useEffect(() => {
-        // sort
-        const sortedItems = itemsWithCost?.sort((a, b) => a.list_order - b.list_order);
-        // lodash groupBy
-        const groupedItems = groupBy(sortedItems, 'completed');
-        setCheckedItems(groupedItems['true'] ?? []);
-        setUncheckedItems(groupedItems['false'] ?? []);
+        if (itemsWithCost) {
+            const sortedItems = sortItemsBySection(
+                itemsWithCost.sort((a, b) => a.item_name.localeCompare(b.item_name)),
+            );
+            const groupedItems = groupBy(sortedItems, 'completed');
+            setCheckedItems(groupedItems['true'] ?? []);
+            setUncheckedItems(groupedItems['false'] ?? []);
+        } else {
+            setCheckedItems([]);
+            setUncheckedItems([]);
+        }
+        setListItemsLoading(false);
     }, [itemsWithCost]);
 
     useEffect(() => {
@@ -102,11 +95,15 @@ export const ListItemsProvider = ({
         }
     }, [list?.store_id, list?.user_id]);
 
-    const handleUpdateListItem = useCallback(async (itemToUpdate: ListItemWithData) => {
+    const handleUpdateListItem = useCallback(async (itemToUpdate: InitialListItemFormValue) => {
         return updateListItem(itemToUpdate)
             .then((updatedItem) => {
-                setItemsWithCost((prev) => updateListItemInArray(prev, updatedItem));
-                setAllStoreItemsWithCost((prev) => updateListItemInArray(prev, updatedItem));
+                setItemsWithCost((prev) =>
+                    upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+                );
+                setAllStoreItemsWithCost((prev) =>
+                    upsertIntoArray<ListItemWithData>(prev, updatedItem, 'list_item_id'),
+                );
                 return updatedItem;
             })
             .catch((e) => {
@@ -137,6 +134,7 @@ export const ListItemsProvider = ({
             setCheckedItems,
             setUncheckedItems,
             unCheckedItems,
+            setListItemsLoading,
         };
     }, [
         allStoreItemsWithCost,
@@ -162,3 +160,27 @@ export const useListItemsProviderContext = () => {
 
     return ctx;
 };
+
+export function sortItemsBySection<T extends object>(
+    listItems: T[],
+    listOrder?: StoreSection[],
+): T[] {
+    const defaultOrder: StoreSection[] = listOrder ?? [
+        'Produce',
+        'Bulk',
+        'Meat/Deli',
+        'Dairy/Eggs',
+        'Frozen',
+        'Toiletries/Paper Products/Cleaning Supplies',
+        'Non-perishable',
+        'Miscellaneous',
+    ];
+    const groupedItems: Record<StoreSection, T[]> = groupBy(listItems, 'store_section') as Record<
+        StoreSection,
+        T[]
+    >;
+
+    return defaultOrder.reduce((orderedList, sectionKey) => {
+        return orderedList.concat(groupedItems?.[sectionKey] ?? []);
+    }, [] as T[]);
+}
