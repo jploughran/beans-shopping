@@ -2,7 +2,7 @@
     "expo": {
         "name": "Bean Shopping",
         "slug": "beans-shopping",
-        "version": "1.0.15",
+        "version": "1.0.18",
         "extra": {
             "eas": {
                 "projectId": "0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
