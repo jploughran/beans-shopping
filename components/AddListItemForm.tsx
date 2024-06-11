@@ -1,7 +1,7 @@
 import { BottomSheetView } from '@gorhom/bottom-sheet';
 import { Formik } from 'formik';
 import { useCallback, useMemo, useState } from 'react';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { KeyboardAvoidingView } from 'react-native';
 import { Button, ScrollView, SizableText, ToggleGroup, XStack, YStack } from 'tamagui';
 
 import FormErrorText from './FormErrorText';
@@ -18,7 +18,6 @@ import {
     InitialListItemFormValue,
     newListItemValidationSchema,
 } from '@/modules/add-list-item-validation';
-import { KeyboardAvoidingView } from 'react-native';
 
 interface Props {
     itemToEdit?: InitialListItemFormValue;
@@ -88,7 +87,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                         style={{ justifyContent: 'flex-start', marginTop: '20%' }}
                     >
                         <ScrollView flex={1} keyboardShouldPersistTaps="handled">
-                            <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+                            <KeyboardAvoidingView behavior="padding">
                                 <YStack
                                     gap="$3"
                                     flex={1}
@@ -164,9 +163,9 @@ export function AddListItemForm({ itemToEdit }: Props) {
                                     </XStack>
                                     <StoreSectionSelector />
 
-                                    <XStack gap="$4" justifyContent="flex-end">
+                                    <XStack gap="$3" justifyContent="flex-end">
                                         <Button
-                                            minWidth={100}
+                                            minWidth={85}
                                             variant="outlined"
                                             borderWidth="$0.25"
                                             size="$3"
@@ -178,7 +177,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                                         </Button>
                                         {!values.completed && (
                                             <Button
-                                                minWidth={100}
+                                                minWidth={85}
                                                 disabled={!isValid}
                                                 size="$3"
                                                 disabledStyle={{ backgroundColor: '$red4' }}
@@ -193,7 +192,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                                             </Button>
                                         )}
                                         <Button
-                                            minWidth={100}
+                                            minWidth={85}
                                             disabled={!isValid}
                                             size="$3"
                                             disabledStyle={{ backgroundColor: '$red4' }}

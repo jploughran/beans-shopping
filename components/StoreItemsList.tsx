@@ -23,7 +23,12 @@ const StoreItemsList = () => {
     );
 
     return itemName ? (
-        <ScrollView horizontal flexDirection="row" showsHorizontalScrollIndicator={false}>
+        <ScrollView
+            horizontal
+            flexDirection="row"
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+        >
             <XStack gap="$2">
                 {fuseList.search(itemName).map(({ item }, i) => {
                     return <StoreItemRow item={item} key={item.created_at} />;

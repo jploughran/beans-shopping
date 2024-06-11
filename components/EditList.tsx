@@ -41,20 +41,7 @@ const EditList = () => {
 
     return (
         <LoadingView loading={listItemsLoading}>
-            <YStack
-                margin="$4"
-                marginTop="$2"
-                height={WINDOW_HEIGHT}
-                flex={1}
-                animation={[
-                    '200ms',
-                    {
-                        opacity: {
-                            overshootClamping: true,
-                        },
-                    },
-                ]}
-            >
+            <YStack margin="$4" marginTop="$2" height={WINDOW_HEIGHT} flex={1} animation="medium">
                 <H5 alignSelf="center">Totals</H5>
                 <XStack gap="$8" alignItems="center" justifyContent="center">
                     <YStack alignItems="center">
