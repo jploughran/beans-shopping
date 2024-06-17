@@ -108,6 +108,14 @@ export async function handleSupabaseInsertRow<T extends ExistingTables>(
     }
 }
 
+export async function removeListItemsForListId(listId: number) {
+    return supabase
+        .from('list_items')
+        .delete()
+        .in('list_id', [listId])
+        .then(({ error }) => (error ? Promise.reject(error) : Promise.resolve()));
+}
+
 export async function handleRemoveSupabaseRow<T>(
     idKey: keyof T,
     dataId: string | number,

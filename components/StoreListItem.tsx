@@ -22,23 +22,14 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
 
     const handleChangeChecked = useCallback(
         async (checked: CheckedState) => {
-            if (checked) {
-                console.log({ checked, itemToUpdate: item });
-                setItemToEdit({
-                    ...item,
-                    completed: !!checked,
-                    price: item.price?.toString() ?? '',
-                    quantity: item.quantity?.toString() ?? '',
-                });
-                handleOpenPress();
-            } else {
-                await handleUpdateListItem({
-                    ...item,
-                    completed: checked,
-                });
-            }
+            await handleUpdateListItem({
+                ...item,
+                completed: !!checked,
+                price: item.price?.toString() ?? '',
+                quantity: item.quantity?.toString() ?? '',
+            });
         },
-        [handleOpenPress, handleUpdateListItem, item, setItemToEdit],
+        [handleUpdateListItem, item],
     );
 
     const handleLongPress = useCallback(() => {
