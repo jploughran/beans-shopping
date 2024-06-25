@@ -38,7 +38,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                       completed: false,
                       description: '',
                       list_id: selectedList?.list_id ?? 0,
-                      quantity: '',
+                      quantity: '1',
                       item_name: '',
                       price: '',
                       price_type: 'count',
@@ -173,7 +173,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                                                 handleClosePress();
                                             }}
                                         >
-                                            Close
+                                            Cancel
                                         </Button>
                                         {!values.completed && (
                                             <Button
@@ -200,7 +200,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                                                 handleSubmit();
                                             }}
                                         >
-                                            Submit
+                                            Save
                                         </Button>
                                     </XStack>
                                     <FormErrorText errors={errors} />

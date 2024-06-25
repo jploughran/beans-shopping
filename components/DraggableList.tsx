@@ -7,13 +7,13 @@ import { SizableText } from 'tamagui';
 
 import { ListItemWithData } from '@/types/list';
 
-interface Props<T extends Partial<ListItemWithData>> {
+interface Props<T extends ListItemWithData> {
     listItems: T[] | undefined;
     handleDragEnd: ((params: DragEndParams<T>) => void) | undefined;
     renderItem: (props: RenderItemParams<T>) => React.JSX.Element;
 }
 
-function DraggableList<T extends Partial<ListItemWithData>>({
+function DraggableList<T extends ListItemWithData>({
     listItems,
     handleDragEnd,
     renderItem,

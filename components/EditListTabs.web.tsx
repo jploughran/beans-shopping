@@ -1,20 +1,14 @@
 import { ListPlus } from '@tamagui/lucide-icons';
 import { useState, useCallback, memo } from 'react';
-import DraggableFlatList, {
-    DragEndParams,
-    RenderItemParams,
-} from 'react-native-draggable-flatlist';
-import { Button, H5, Separator, SizableText, Tabs } from 'tamagui';
+import { RenderItemParams } from 'react-native-draggable-flatlist';
+import { Button, H5, ScrollView, Separator, Tabs } from 'tamagui';
 
 import { AddListItemForm } from './AddListItemForm';
+import DraggableList from './DraggableList';
 import FormBottomSheet from './FormBottomSheet';
-import LoadingView from './LoadingView';
 import StoreListItem from './StoreListItem';
 
-import {
-    BottomSheetProvider,
-    useBottomSheetProviderContext,
-} from '@/context-providers/BottomSheetProvider';
+import { useBottomSheetProviderContext } from '@/context-providers/BottomSheetProvider';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
 import { InitialListItemFormValue } from '@/modules/add-list-item-validation';
 import { handleSupabaseUpsert } from '@/modules/supabase-list-utils';
@@ -78,27 +72,31 @@ const EditListTabs = () => {
                 </Tabs.Tab>
             </Tabs.List>
             <Tabs.Content value="tab1" flex={0.9}>
-                <DraggableList
-                    listItems={unCheckedItems ?? []}
-                    handleDragEnd={({ data }) => handleDragEnd(data, setUncheckedItems, false)}
-                    renderItem={renderItem}
-                />
-                <Button
-                    icon={ListPlus}
-                    marginVertical="$3"
-                    onPress={() => {
-                        setItemToEdit(undefined);
-                        handleOpenPress();
-                    }}
-                />
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <DraggableList
+                        listItems={unCheckedItems ?? []}
+                        handleDragEnd={({ data }) => handleDragEnd(data, setUncheckedItems, false)}
+                        renderItem={renderItem}
+                    />
+                    <Button
+                        icon={ListPlus}
+                        marginVertical="$3"
+                        onPress={() => {
+                            setItemToEdit(undefined);
+                            handleOpenPress();
+                        }}
+                    />
+                </ScrollView>
             </Tabs.Content>
 
             <Tabs.Content value="tab2" flex={1}>
-                <DraggableList
-                    listItems={checkedItems ?? []}
-                    handleDragEnd={({ data }) => handleDragEnd(data, setCheckedItems, true)}
-                    renderItem={renderItem}
-                />
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <DraggableList
+                        listItems={checkedItems ?? []}
+                        handleDragEnd={({ data }) => handleDragEnd(data, setCheckedItems, true)}
+                        renderItem={renderItem}
+                    />
+                </ScrollView>
             </Tabs.Content>
             <FormBottomSheet>
                 <AddListItemForm itemToEdit={itemToEdit} />
@@ -108,28 +106,3 @@ const EditListTabs = () => {
 };
 
 export default memo(EditListTabs);
-
-const DraggableList = ({
-    listItems,
-    handleDragEnd,
-    renderItem,
-}: {
-    listItems: ListItemWithData[] | undefined;
-    handleDragEnd: ((params: DragEndParams<ListItemWithData>) => void) | undefined;
-    renderItem: (props: RenderItemParams<ListItemWithData>) => React.JSX.Element;
-}) => {
-    return (
-        <DraggableFlatList
-            data={listItems ?? []}
-            onDragEnd={handleDragEnd}
-            keyExtractor={(item, i) => item.list_item_id + item.item_name}
-            showsVerticalScrollIndicator={false}
-            renderItem={renderItem}
-            ListEmptyComponent={
-                <SizableText marginVertical="$8" size="$4" alignSelf="center">
-                    Please add some items to get started...
-                </SizableText>
-            }
-        />
-    );
-};
