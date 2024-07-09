@@ -71,3 +71,9 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 .vercel
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+playwright/.auth
