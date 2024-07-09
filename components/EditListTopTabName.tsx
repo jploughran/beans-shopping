@@ -15,6 +15,12 @@ const EditListTopTabName = () => {
         if (!selectedList) {
             return;
         }
+        if (Platform.OS === 'web' && window.confirm('Clear list?')) {
+            removeListItemsForListId(selectedList.list_id)
+                .then(() => setItemsWithCost([]))
+                .catch((e) => console.log('Error clearing list', e));
+            return;
+        }
         Alert.alert(
             'Clear list?',
             'Would you like to clear the list completely and start a new trip?',

@@ -4,7 +4,7 @@ import { Formik } from 'formik';
 import { memo, useState } from 'react';
 import { Alert, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Button, H3, Image, Label, SizableText, Spinner, View, XStack, YStack } from 'tamagui';
+import { Button, H2, H3, Image, Label, SizableText, Spinner, View, XStack, YStack } from 'tamagui';
 
 import FormField from '../components/FormField';
 import SubmitButton from '../components/SubmitButton';
@@ -23,13 +23,13 @@ const SignIn = () => {
     return (
         <KeyboardAwareScrollView contentContainerStyle={styles.container}>
             <View backgroundColor="$green3" style={styles.container}>
-                <H3 marginBottom="$5">Bean Shopping</H3>
+                <H2 marginBottom="$5">Bean Shopping</H2>
                 <Image
                     src={logo}
                     style={{
-                        height: 200,
-                        width: 200,
-                        borderRadius: 5,
+                        height: 210,
+                        width: 210,
+                        borderRadius: 7,
                     }}
                 />
                 <Formik
@@ -40,8 +40,11 @@ const SignIn = () => {
                             email,
                             password,
                         });
-                        router.push('/(app)/(tabs)/');
-                        if (error) Alert.alert(error.message);
+                        if (error) {
+                            Alert.alert(error.message);
+                        } else {
+                            router.push('/(app)/(tabs)/');
+                        }
                         setLoading(false);
                     }}
                     validateOnChange
