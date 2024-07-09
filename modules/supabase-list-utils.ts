@@ -4,8 +4,11 @@ import { supabase } from './supabase';
 import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
 import { ITEMS, LISTS, LIST_ITEMS, List, ListItemWithData, Store, StoreItem } from '@/types/list';
 import { Database, ExistingTables, InsertType, RowType } from '@/types/supabase';
+import { breadcrumb, logError } from '@/utils/logging';
 
 export const addListToTable = async (storeId: number, listName: string) => {
+    breadcrumb(`[addListToTable]`, 'supabase-utils', { storeId, listName });
+
     const { data, error } = await supabase
         .from(LISTS)
         .insert([{ store_id: storeId, list_name: listName }])
@@ -21,6 +24,8 @@ export const addListToTable = async (storeId: number, listName: string) => {
 export const updateListItem = async (
     itemData: InitialListItemFormValue,
 ): Promise<ListItemWithData> => {
+    breadcrumb(`[updateListItem]`, 'supabase-utils', { itemData });
+
     const {
         store_id,
         item_name,
@@ -35,12 +40,11 @@ export const updateListItem = async (
         list_item_id,
         completed,
     } = itemData;
-    console.log('store section in addListItem', { store_section });
     return handleSupabaseInsertRow(
         {
             store_id,
             item_name,
-            price: parseFloat(price),
+            price: parseFloat(price ?? '0'),
             price_type,
             user_id,
             item_id,
@@ -54,7 +58,7 @@ export const updateListItem = async (
                     list_item_id,
                     list_id,
                     item_id: itemAddedToStore.item_id,
-                    quantity: parseFloat(quantity),
+                    quantity: parseFloat(quantity ?? '1'),
                     user_id,
                     list_order,
                     completed,
@@ -64,12 +68,20 @@ export const updateListItem = async (
                 .then((listItem) => {
                     return { ...itemAddedToStore, ...listItem };
                 })
-                .catch((e) => Promise.reject(e));
+                .catch((e) => {
+                    logError(e, 1);
+                    return Promise.reject(e);
+                });
         })
-        .catch((e) => Promise.reject(e));
+        .catch((e) => {
+            logError(e, 1);
+            return Promise.reject(e);
+        });
 };
 
 export const addStoreItem = async (itemData: ItemFormInitialValues): Promise<StoreItem> => {
+    breadcrumb(`[addStoreItem]`, 'supabase-utils', { itemData });
+
     try {
         const { store_id, item_name, price, price_type, item_id, store_section } = itemData;
 
@@ -87,6 +99,7 @@ export const addStoreItem = async (itemData: ItemFormInitialValues): Promise<Sto
             return itemAddedToStore;
         });
     } catch (error) {
+        logError(error, 1);
         return Promise.reject(error);
     }
 };
@@ -95,6 +108,7 @@ export async function handleSupabaseInsertRow<T extends ExistingTables>(
     data: InsertType<T>,
     tableToUpdate: T,
 ): Promise<RowType<T>> {
+    breadcrumb(`[handleSupabaseInsertRow]`, 'supabase-utils', { data, tableToUpdate });
     const { data: data_1, error } = await supabase
         .from(tableToUpdate)
         .upsert({ ...data })
@@ -103,17 +117,28 @@ export async function handleSupabaseInsertRow<T extends ExistingTables>(
         const itemAdded = data_1[0];
         return Promise.resolve(itemAdded);
     } else {
+        logError(error, 1);
+
         console.log('error in handleSupabaseInsertRow', { error });
         return Promise.reject(error);
     }
 }
 
 export async function removeListItemsForListId(listId: number) {
+    breadcrumb(`[removeListItemsForListId]`, 'supabase-utils', { listId });
+
     return supabase
         .from('list_items')
         .delete()
         .in('list_id', [listId])
-        .then(({ error }) => (error ? Promise.reject(error) : Promise.resolve()));
+        .then(({ error }) => {
+            if (error) {
+                logError(error, 1);
+                return Promise.reject(error);
+            } else {
+                return Promise.resolve();
+            }
+        });
 }
 
 export async function handleRemoveSupabaseRow<T>(
@@ -121,11 +146,20 @@ export async function handleRemoveSupabaseRow<T>(
     dataId: string | number,
     tableToUpdate: keyof Database['public']['Tables'],
 ): Promise<void> {
+    breadcrumb(`[handleRemoveSupabaseRow]`, 'supabase-utils', { idKey, dataId, tableToUpdate });
+
     return supabase
         .from(tableToUpdate)
         .delete()
         .eq(idKey.toString(), dataId)
-        .then(({ error }) => (error ? Promise.reject(error) : Promise.resolve()));
+        .then(({ error }) => {
+            if (error) {
+                logError(error, 1);
+                return Promise.reject(error);
+            } else {
+                return Promise.resolve();
+            }
+        });
 }
 
 export async function handleUpdateSupabaseRow<T extends ExistingTables>(
@@ -134,7 +168,13 @@ export async function handleUpdateSupabaseRow<T extends ExistingTables>(
     dataId: string | number,
     tableToUpdate: T,
 ) {
-    console.log({ data, idKey, dataId, tableToUpdate });
+    breadcrumb(`[handleUpdateSupabaseRow]`, 'supabase-utils', {
+        data,
+        idKey,
+        dataId,
+        tableToUpdate,
+    });
+
     return supabase
         .from(tableToUpdate)
         .update({ ...data })
@@ -142,6 +182,7 @@ export async function handleUpdateSupabaseRow<T extends ExistingTables>(
         .select()
         .then(({ data, error }) => {
             if (error) {
+                logError(error, 1);
                 return Promise.reject(error);
             } else {
                 return Promise.resolve(data[0]);
@@ -150,42 +191,70 @@ export async function handleUpdateSupabaseRow<T extends ExistingTables>(
 }
 
 export const getStores = async () => {
+    breadcrumb(`[getStores]`, 'supabase-utils', {});
+
     return supabase
         .from('stores')
         .select(`*`)
-        .then(({ data, error }) => {
-            return data ? Promise.resolve(data as Store[]) : Promise.reject(error);
+        .then(async ({ data, error }) => {
+            if (data) {
+                return Promise.resolve(data as Store[]);
+            } else {
+                logError(error, 1);
+                return Promise.reject(error);
+            }
         });
 };
 
 export const getListItemsWithData = async (listId: number, user_id: string) => {
+    breadcrumb(`[getListItemsWithData]`, 'supabase-utils', { listId, user_id });
+
     return supabase
         .from('list_items_with_store_data')
         .select(`*`)
         .eq('list_id', listId)
         .eq('user_id', user_id)
-        .then(({ data, error }) => {
-            return data ? Promise.resolve(data as ListItemWithData[]) : Promise.reject(error);
+        .then(async ({ data, error }) => {
+            if (data) {
+                return Promise.resolve(data as ListItemWithData[]);
+            } else {
+                logError(error, 1);
+                return Promise.reject(error);
+            }
         });
 };
 
 export const getListItemsForStore = async (storeId: number, user_id: string) => {
+    breadcrumb(`[getListItemsForStore]`, 'supabase-utils', { storeId, user_id });
+
     return supabase
         .from('list_items_with_store_data')
         .select(`*`)
         .eq('store_id', storeId)
         .eq('user_id', user_id)
-        .then(({ data, error }) => {
-            return data ? Promise.resolve(data as ListItemWithData[]) : Promise.reject(error);
+        .then(async ({ data, error }) => {
+            if (data) {
+                return Promise.resolve(data as ListItemWithData[]);
+            } else {
+                logError(error, 1);
+                return Promise.reject(error);
+            }
         });
 };
 
 export const getItemsForStores = async () => {
+    breadcrumb(`[getItemsForStores]`, 'supabase-utils', {});
+
     return supabase
         .from('items')
         .select(`*`)
-        .then(({ data, error }) => {
-            return data ? Promise.resolve(data as StoreItem[]) : Promise.reject(error);
+        .then(async ({ data, error }) => {
+            if (data) {
+                return Promise.resolve(data as StoreItem[]);
+            } else {
+                logError(error, 1);
+                return Promise.reject(error);
+            }
         });
 };
 
@@ -193,6 +262,8 @@ export async function handleSupabaseUpsert<T extends ExistingTables>(
     data: Partial<InsertType<T>>[],
     tableToUpdate: T,
 ) {
+    breadcrumb(`[handleSupabaseUpsert]`, 'supabase-utils', { data, tableToUpdate });
+
     return supabase
         .from(tableToUpdate)
         .upsert(data)

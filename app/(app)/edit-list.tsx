@@ -1,5 +1,10 @@
 import EditList from '@/components/EditList';
+import SimpleErrorBoundary from '@/components/SimpleErrorBoundary';
 
 export default () => {
-    return <EditList />;
+    return (
+        <SimpleErrorBoundary location="EditList">
+            <EditList />
+        </SimpleErrorBoundary>
+    );
 };

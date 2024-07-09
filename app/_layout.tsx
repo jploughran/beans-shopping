@@ -2,6 +2,7 @@ import '../tamagui-web.css';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ThemeProvider, Theme as NavTheme } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
 import { ToastProvider } from '@tamagui/toast';
 import { useFonts } from 'expo-font';
 import { Slot } from 'expo-router';
@@ -14,7 +15,9 @@ import { TamaguiProvider, Theme } from 'tamagui';
 import { tamaguiConfig } from '../tamagui.config';
 
 import { SafeToastViewport } from '@/components/SafeToastViewport';
+import SimpleErrorBoundary from '@/components/SimpleErrorBoundary';
 import { UserProvider } from '@/context-providers/UserProvider';
+import { initializeSentry } from '@/utils/logging';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -26,10 +29,12 @@ export const unstable_settings = {
     initialRouteName: '(tabs)',
 };
 
+initializeSentry();
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayout() {
     const [loaded, error] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
         Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
@@ -55,6 +60,8 @@ export default function RootLayout() {
     return <RootLayoutNav />;
 }
 
+export default Sentry.wrap(RootLayout);
+
 function RootLayoutNav() {
     const colorScheme = useColorScheme();
 
@@ -68,8 +75,10 @@ function RootLayoutNav() {
                     <Theme name="green">
                         <UserProvider>
                             <ToastProvider>
-                                <Slot />
-                                <SafeToastViewport />
+                                <SimpleErrorBoundary location="app_layout">
+                                    <Slot />
+                                    <SafeToastViewport />
+                                </SimpleErrorBoundary>
                             </ToastProvider>
                         </UserProvider>
                     </Theme>
