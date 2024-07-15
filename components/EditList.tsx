@@ -2,6 +2,8 @@ import { WINDOW_HEIGHT } from '@gorhom/bottom-sheet';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { H5, Separator, SizableText, XStack, YStack } from 'tamagui';
 
+import SimpleErrorBoundary from './SimpleErrorBoundary';
+
 import EditListTabs from '@/components/EditListTabs';
 import LoadingView from '@/components/LoadingView';
 import { useListItemsProviderContext } from '@/context-providers/ListItemsProvider';
@@ -58,7 +60,9 @@ const EditList = () => {
                     </YStack>
                 </XStack>
                 <Separator marginTop="$3" backgroundColor="$green10" />
-                <EditListTabs />
+                <SimpleErrorBoundary location="EditListTabs">
+                    <EditListTabs />
+                </SimpleErrorBoundary>
             </YStack>
         </LoadingView>
     );

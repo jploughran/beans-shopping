@@ -21,10 +21,7 @@ const StoreItemTable = () => {
             {
                 icon: () => <Trash color="$red10" size="$1" />,
                 onClick: async (event: unknown, rowData: StoreItem | StoreItem[]) => {
-                    if (!Array.isArray(rowData))
-                        await handleRemoveStoreItem(rowData.item_id).catch((e) =>
-                            console.log({ error: e }),
-                        );
+                    if (!Array.isArray(rowData)) await handleRemoveStoreItem(rowData.item_id);
                 },
                 tooltip: 'Delete Item?',
             },

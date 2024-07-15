@@ -1,5 +1,10 @@
 import EditStoreItems from '@/components/EditStoreItems';
+import SimpleErrorBoundary from '@/components/SimpleErrorBoundary';
 
 export default function TabTwoScreen() {
-    return <EditStoreItems />;
+    return (
+        <SimpleErrorBoundary location="EditStoreItems">
+            <EditStoreItems />
+        </SimpleErrorBoundary>
+    );
 }

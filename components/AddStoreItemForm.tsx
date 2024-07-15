@@ -29,7 +29,6 @@ function AddStoreItemForm({ itemToEdit }: Props) {
     const [loading, setLoading] = useState(false);
     const { handleClosePress } = useBottomSheetProviderContext();
 
-    console.log('rendering AddStoreItemForm', { itemToEdit });
     if (!itemToEdit) {
         return null;
     }

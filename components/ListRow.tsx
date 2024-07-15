@@ -34,7 +34,6 @@ const ListRow = ({ list }: Props) => {
                 pressTheme
                 onPress={() => {
                     router.push('/edit-list');
-                    console.log({ name: list.list_name });
                     setSelectedList(list);
                 }}
             />

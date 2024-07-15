@@ -40,6 +40,16 @@
         },
         "updates": {
             "url": "https://u.expo.dev/0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
-        }
+        },
+        "plugins": [
+            [
+                "@sentry/react-native/expo",
+                {
+                    "url": "https://sentry.io/",
+                    "project": "bean-list-app",
+                    "organization": "bean-app"
+                }
+            ]
+        ]
     }
 }

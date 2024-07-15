@@ -13,6 +13,7 @@ import {
 } from '@/modules/supabase-list-utils';
 import { ITEMS, StoreItem } from '@/types/list';
 import { upsertIntoArray } from '@/utils/array-utils';
+import { breadcrumb, logError } from '@/utils/logging';
 
 export interface StoreItemContextProvider {
     selectedStoreItems: StoreItem[] | undefined;
@@ -59,12 +60,12 @@ export const StoreItemProvider = ({
 
     useEffect(() => {
         const getStoreItems = async () => {
-            console.log('[getStoreItems] store_id called');
+            breadcrumb('[getStoreItems] store_id called', 'supabase');
             await getItemsForStores()
                 .then((listItems) => {
                     setAllStoreItems(groupBy(listItems, 'store_id'));
                 })
-                .catch((e) => console.error(e));
+                .catch((e) => logError(e, 1));
         };
         getStoreItems();
     }, []);
@@ -72,6 +73,7 @@ export const StoreItemProvider = ({
     const handleUpdateStoreItem = useCallback(
         async (itemToUpdate: ItemFormInitialValues) => {
             if (!selectedStoreId) {
+                logError('Missing store Id [handleUpdateStoreItem]', 1);
                 return Promise.reject(new Error('Missing store Id [handleUpdateStoreItem]'));
             }
             return addStoreItem(itemToUpdate)
@@ -91,6 +93,8 @@ export const StoreItemProvider = ({
                 })
                 .catch((e) => {
                     console.log('Error in [handleUpdateStoreItem]', { e });
+                    logError(e, 1);
+
                     return Promise.reject(e);
                 });
         },
@@ -101,6 +105,8 @@ export const StoreItemProvider = ({
         async (itemToRemoveId: number) => {
             if (!selectedStoreId) {
                 console.error('Missing store Id [handleUpdateStoreItem]');
+                logError('Missing store Id [handleUpdateStoreItem]', 1);
+
                 return Promise.reject(new Error('Missing store Id [handleUpdateStoreItem]'));
             }
             await handleRemoveSupabaseRow<StoreItem>('item_id', itemToRemoveId, ITEMS)
@@ -115,6 +121,7 @@ export const StoreItemProvider = ({
                 })
                 .catch((e) => {
                     console.log('Error in [handleUpdateListItem]', { e });
+                    logError(e, 1);
                     return Promise.reject(e);
                 });
         },
