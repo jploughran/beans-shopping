@@ -12,6 +12,7 @@ export const SignOutButton = () => {
             }}
             size="$3"
             variant="outlined"
+            maxWidth="$15"
         >
             Log Out
         </Button>
