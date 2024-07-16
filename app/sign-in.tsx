@@ -4,7 +4,7 @@ import { Formik } from 'formik';
 import { memo, useState } from 'react';
 import { Alert, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Button, H2, H3, Image, Label, SizableText, Spinner, View, XStack, YStack } from 'tamagui';
+import { Button, H2, Image, Label, SizableText, Spinner, View, XStack, YStack } from 'tamagui';
 
 import FormField from '../components/FormField';
 import SubmitButton from '../components/SubmitButton';

@@ -11,7 +11,7 @@
         "scheme": "beanshopper",
         "android": {
             "package": "com.synergetx.beansshopping",
-            "versionCode": 5,
+            "versionCode": 6,
             "adaptiveIcon": {
                 "foregroundImage": "./assets/images/BeanLogo.png",
                 "backgroundColor": "#e9f9ee"

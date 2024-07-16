@@ -27,7 +27,10 @@
             }
         },
         "production": {
-            "channel": "production-bean-shopping"
+            "channel": "production-bean-shopping",
+            "android": {
+                "autoIncrement": "versionCode"
+            }
         }
     },
     "submit": {

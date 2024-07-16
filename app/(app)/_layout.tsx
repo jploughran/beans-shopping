@@ -4,15 +4,15 @@ import { AppState, AppStateStatus } from 'react-native';
 import { SizableText } from 'tamagui';
 
 import EditListTopTabName from '@/components/EditListTopTabName';
+import SimpleErrorBoundary from '@/components/SimpleErrorBoundary';
 import { UpdateDialog } from '@/components/UpdateDialog';
 import { BottomSheetProvider } from '@/context-providers/BottomSheetProvider';
 import { ListItemsProvider } from '@/context-providers/ListItemsProvider';
 import { ListsProvider } from '@/context-providers/ListProvider';
+import { StoreItemProvider } from '@/context-providers/StoreItemsProvider';
 import { useUserProviderContext } from '@/context-providers/UserProvider';
 import { useUpdateModal } from '@/hooks/useUpdateModal';
-import { StoreItemProvider } from '@/context-providers/StoreItemsProvider';
 import { breadcrumb } from '@/utils/logging';
-import SimpleErrorBoundary from '@/components/SimpleErrorBoundary';
 
 export default function AppLayout() {
     const { session } = useUserProviderContext();
