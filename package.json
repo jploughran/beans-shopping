@@ -14,7 +14,8 @@
         "build:production": "eas build --profile production --local --clear-cache",
         "publish:preview": "eas update --channel preview-bean-shopping",
         "publish:production": "eas update --channel production-bean-shopping",
-        "expo-doctor": "npx expo-doctor"
+        "expo-doctor": "npx expo-doctor",
+        "update-types": "npx supabase gen types typescript --project-id raslzjawxsqvhscsokix > types/supabase.ts"
     },
     "jest": {
         "preset": "jest-expo"

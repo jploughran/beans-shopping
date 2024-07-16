@@ -218,6 +218,7 @@ export type Database = {
                     price_type: Database['public']['Enums']['price_type'] | null;
                     quantity: number | null;
                     store_id: number | null;
+                    store_section: Database['public']['Enums']['store_location'] | null;
                     user_id: string | null;
                 };
                 Relationships: [
@@ -246,7 +247,10 @@ export type Database = {
             };
         };
         Functions: {
-            [_ in never]: never;
+            delete_user: {
+                Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
         };
         Enums: {
             price_type: 'weight' | 'count';
