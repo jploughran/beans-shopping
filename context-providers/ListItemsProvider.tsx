@@ -58,6 +58,7 @@ export const ListItemsProvider = ({
                 itemsWithCost.sort((a, b) => a.item_name.localeCompare(b.item_name)),
             );
             const groupedItems = groupBy(sortedItems, 'completed');
+            console.log('settting checked items');
             setCheckedItems(groupedItems['true'] ?? []);
             setUncheckedItems(groupedItems['false'] ?? []);
         } else {
@@ -95,21 +96,40 @@ export const ListItemsProvider = ({
         }
     }, [list?.store_id, list?.user_id]);
 
+    // Optimistically update the itemsWithCost array with the new item and
     const handleUpdateListItem = useCallback(async (itemToUpdate: InitialListItemFormValue) => {
-        return updateListItem(itemToUpdate)
-            .then((updatedItem) => {
-                setItemsWithCost((prev) =>
-                    upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
-                );
-                setAllStoreItemsWithCost((prev) =>
-                    upsertIntoArray<ListItemWithData>(prev, updatedItem, 'list_item_id'),
-                );
+        if (itemToUpdate.item_id && itemToUpdate.list_item_id) {
+            const itemToUpsert = {
+                ...itemToUpdate,
+                quantity: parseFloat(itemToUpdate?.quantity ?? '0'),
+                price: parseFloat(itemToUpdate?.price ?? '0'),
+            } as ListItemWithData;
+            setItemsWithCost((prev) =>
+                upsertIntoArray<ListItemWithData>(prev ?? [], itemToUpsert, 'list_item_id'),
+            );
+            setAllStoreItemsWithCost((prev) =>
+                upsertIntoArray<ListItemWithData>(prev ?? [], itemToUpsert, 'list_item_id'),
+            );
+            updateListItem(itemToUpdate).then((updatedItem) => {
                 return updatedItem;
-            })
-            .catch((e) => {
-                console.log('Error in [handleUpdateListItem]', { e });
-                return Promise.reject(e);
             });
+            return Promise.resolve(itemToUpsert);
+        } else {
+            return updateListItem(itemToUpdate)
+                .then((updatedItem) => {
+                    setItemsWithCost((prev) =>
+                        upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+                    );
+                    setAllStoreItemsWithCost((prev) =>
+                        upsertIntoArray<ListItemWithData>(prev, updatedItem, 'list_item_id'),
+                    );
+                    return updatedItem;
+                })
+                .catch((e) => {
+                    console.log('Error in [handleUpdateListItem]', { e });
+                    return Promise.reject(e);
+                });
+        }
     }, []);
 
     const handleRemoveListItem = useCallback(async (itemToRemoveId: number) => {

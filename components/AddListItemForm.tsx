@@ -45,7 +45,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                       store_id: selectedList?.store_id ?? 0,
                       user_id: selectedList?.user_id ?? '',
                       list_order: itemsWithCost?.length ?? 0,
-                      store_section: 'Miscellaneous',
+                      store_section: 'Produce',
                   },
         [
             itemToEdit,
