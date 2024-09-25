@@ -17,22 +17,11 @@ interface Props extends RenderItemParams<ListItemWithData> {
 }
 
 const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
-    const { handleUpdateListItem, handleRemoveListItem, setCheckedItems, setUncheckedItems } =
-        useListItemsProviderContext();
+    const { handleUpdateListItem, handleRemoveListItem } = useListItemsProviderContext();
     const { handleOpenPress } = useBottomSheetProviderContext();
 
     const handleChangeChecked = useCallback(
-        // If the item is already checked, uncheck it. Otherwise, check it.
         async (checked: CheckedState) => {
-            if (checked) {
-                setCheckedItems((prev) => {
-                    return prev?.concat([{ ...item, completed: true }]);
-                });
-            } else {
-                setUncheckedItems((prev) => {
-                    return prev?.concat([{ ...item, completed: false }]);
-                });
-            }
             await handleUpdateListItem({
                 ...item,
                 completed: !!checked,
@@ -40,7 +29,7 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
                 quantity: item.quantity?.toString() ?? '',
             });
         },
-        [handleUpdateListItem, item, setCheckedItems, setUncheckedItems],
+        [handleUpdateListItem, item],
     );
 
     const handleLongPress = useCallback(() => {
@@ -90,7 +79,7 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
                             </XStack>
 
                             <Checkbox
-                                size="$4"
+                                size="$5"
                                 checked={item.completed}
                                 onCheckedChange={handleChangeChecked}
                             >

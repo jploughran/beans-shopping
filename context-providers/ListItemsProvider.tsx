@@ -22,6 +22,7 @@ import {
 } from '@/modules/supabase-list-utils';
 import { LIST_ITEMS, ListItem, ListItemWithData, StoreSection } from '@/types/list';
 import { upsertIntoArray } from '@/utils/array-utils';
+import { logError } from '@/utils/logging';
 
 export interface ListItemsProviderContextValues {
     allStoreItemsWithCost: ListItemWithData[] | undefined;
@@ -53,22 +54,6 @@ export const ListItemsProvider = ({
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
     useEffect(() => {
-        if (itemsWithCost) {
-            const sortedItems = sortItemsBySection(
-                itemsWithCost.sort((a, b) => a.item_name.localeCompare(b.item_name)),
-            );
-            const groupedItems = groupBy(sortedItems, 'completed');
-            console.log('settting checked items');
-            setCheckedItems(groupedItems['true'] ?? []);
-            setUncheckedItems(groupedItems['false'] ?? []);
-        } else {
-            setCheckedItems([]);
-            setUncheckedItems([]);
-        }
-        setListItemsLoading(false);
-    }, [itemsWithCost]);
-
-    useEffect(() => {
         if (list?.list_id && list?.user_id) {
             const getListItems = async () => {
                 console.log('[getListItemsWithData] list_id called');
@@ -76,6 +61,18 @@ export const ListItemsProvider = ({
                 await getListItemsWithData(list.list_id, list.user_id)
                     .then((listItems) => {
                         setItemsWithCost(listItems);
+                        if (listItems.length > 0) {
+                            const sortedItems = sortItemsBySection(
+                                listItems.sort((a, b) => a.item_name.localeCompare(b.item_name)),
+                            );
+                            const groupedItems = groupBy(sortedItems, 'completed');
+                            console.log('settting checked items');
+                            setCheckedItems(groupedItems['true'] ?? []);
+                            setUncheckedItems(groupedItems['false'] ?? []);
+                        } else {
+                            setCheckedItems([]);
+                            setUncheckedItems([]);
+                        }
                     })
                     .catch((e) => console.error(e))
                     .finally(() => setListItemsLoading(false));
@@ -96,41 +93,56 @@ export const ListItemsProvider = ({
         }
     }, [list?.store_id, list?.user_id]);
 
-    // Optimistically update the itemsWithCost array with the new item and
-    const handleUpdateListItem = useCallback(async (itemToUpdate: InitialListItemFormValue) => {
-        if (itemToUpdate.item_id && itemToUpdate.list_item_id) {
-            const itemToUpsert = {
-                ...itemToUpdate,
-                quantity: parseFloat(itemToUpdate?.quantity ?? '0'),
-                price: parseFloat(itemToUpdate?.price ?? '0'),
-            } as ListItemWithData;
-            setItemsWithCost((prev) =>
-                upsertIntoArray<ListItemWithData>(prev ?? [], itemToUpsert, 'list_item_id'),
-            );
-            setAllStoreItemsWithCost((prev) =>
-                upsertIntoArray<ListItemWithData>(prev ?? [], itemToUpsert, 'list_item_id'),
-            );
-            updateListItem(itemToUpdate).then((updatedItem) => {
-                return updatedItem;
+    const updateCheckedItems = useCallback((updatedItem: ListItemWithData) => {
+        if (updatedItem.completed) {
+            setCheckedItems((prev) => {
+                return prev?.concat([{ ...updatedItem, completed: true }]);
             });
-            return Promise.resolve(itemToUpsert);
         } else {
-            return updateListItem(itemToUpdate)
-                .then((updatedItem) => {
-                    setItemsWithCost((prev) =>
-                        upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
-                    );
-                    setAllStoreItemsWithCost((prev) =>
-                        upsertIntoArray<ListItemWithData>(prev, updatedItem, 'list_item_id'),
-                    );
-                    return updatedItem;
-                })
-                .catch((e) => {
-                    console.log('Error in [handleUpdateListItem]', { e });
-                    return Promise.reject(e);
-                });
+            setUncheckedItems((prev) => {
+                return prev?.concat([{ ...updatedItem, completed: false }]);
+            });
         }
     }, []);
+
+    const updateAllStoreItemsAndItemsWithCost = useCallback((updatedItem: ListItemWithData) => {
+        setAllStoreItemsWithCost((prev) =>
+            upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+        );
+        setItemsWithCost((prev) =>
+            upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+        );
+    }, []);
+
+    // Optimistically update the itemsWithCost array with the new item and
+    const handleUpdateListItem = useCallback(
+        async (itemToUpdate: InitialListItemFormValue) => {
+            if (itemToUpdate.item_id && itemToUpdate.list_item_id) {
+                const itemToUpsert = {
+                    ...itemToUpdate,
+                    quantity: parseFloat(itemToUpdate?.quantity ?? '0'),
+                    price: parseFloat(itemToUpdate?.price ?? '0'),
+                } as ListItemWithData;
+                updateAllStoreItemsAndItemsWithCost(itemToUpsert);
+                updateListItem(itemToUpdate);
+                updateCheckedItems(itemToUpsert);
+                return Promise.resolve(itemToUpsert);
+            } else {
+                return updateListItem(itemToUpdate)
+                    .then((updatedItem) => {
+                        updateAllStoreItemsAndItemsWithCost(updatedItem);
+                        updateCheckedItems(updatedItem);
+                        return updatedItem;
+                    })
+                    .catch((e) => {
+                        console.log('Error in [handleUpdateListItem]', { e });
+                        logError(e);
+                        return Promise.reject(e);
+                    });
+            }
+        },
+        [updateAllStoreItemsAndItemsWithCost, updateCheckedItems],
+    );
 
     const handleRemoveListItem = useCallback(async (itemToRemoveId: number) => {
         handleRemoveSupabaseRow<ListItem>('list_item_id', itemToRemoveId, LIST_ITEMS).then(() => {

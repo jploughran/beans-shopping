@@ -79,7 +79,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
             validateOnMount
             enableReinitialize
         >
-            {({ values, errors, setFieldValue, handleSubmit, isValid }) => (
+            {({ values, errors, setFieldValue, handleSubmit, isValid, resetForm }) => (
                 <BottomSheetView style={{ flex: 1 }}>
                     <LoadingView
                         loading={loading}
@@ -170,6 +170,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                                             borderWidth="$0.25"
                                             size="$3"
                                             onPress={() => {
+                                                resetForm();
                                                 handleClosePress();
                                             }}
                                         >

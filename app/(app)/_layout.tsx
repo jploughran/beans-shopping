@@ -47,7 +47,7 @@ export default function AppLayout() {
     }, [appState, onAppStateChange]);
 
     if (!session) {
-        return <Redirect href="/welcome" />;
+        return <Redirect href="/sign-in" />;
     }
     return (
         <SimpleErrorBoundary location="signed-in-layout">
