@@ -53,6 +53,22 @@ export const ListItemsProvider = ({
     const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
+    const updateCheckedItems = useCallback((listItems: ListItemWithData[]) => {
+        console.log('updateCheckedItems called');
+        if (listItems.length > 0) {
+            const sortedItems = sortItemsBySection(
+                listItems.sort((a, b) => a.item_name.localeCompare(b.item_name)),
+            );
+            const groupedItems = groupBy(sortedItems, 'completed');
+            setCheckedItems(groupedItems['true'] ?? []);
+            setUncheckedItems(groupedItems['false'] ?? []);
+            console.log('updateCheckedItems finished');
+        } else {
+            setCheckedItems([]);
+            setUncheckedItems([]);
+        }
+    }, []);
+
     useEffect(() => {
         if (list?.list_id && list?.user_id) {
             const getListItems = async () => {
@@ -61,25 +77,14 @@ export const ListItemsProvider = ({
                 await getListItemsWithData(list.list_id, list.user_id)
                     .then((listItems) => {
                         setItemsWithCost(listItems);
-                        if (listItems.length > 0) {
-                            const sortedItems = sortItemsBySection(
-                                listItems.sort((a, b) => a.item_name.localeCompare(b.item_name)),
-                            );
-                            const groupedItems = groupBy(sortedItems, 'completed');
-                            console.log('settting checked items');
-                            setCheckedItems(groupedItems['true'] ?? []);
-                            setUncheckedItems(groupedItems['false'] ?? []);
-                        } else {
-                            setCheckedItems([]);
-                            setUncheckedItems([]);
-                        }
+                        updateCheckedItems(listItems);
                     })
                     .catch((e) => console.error(e))
                     .finally(() => setListItemsLoading(false));
             };
             getListItems();
         }
-    }, [list?.list_id, list?.user_id]);
+    }, [list?.list_id, list?.user_id, updateCheckedItems]);
 
     useEffect(() => {
         if (list?.store_id && list?.user_id) {
@@ -93,30 +98,29 @@ export const ListItemsProvider = ({
         }
     }, [list?.store_id, list?.user_id]);
 
-    const updateCheckedItems = useCallback((updatedItem: ListItemWithData) => {
-        if (updatedItem.completed) {
-            setCheckedItems((prev) => {
-                return prev?.concat([{ ...updatedItem, completed: true }]);
+    const updateAllStoreItemsAndItemsWithCost = useCallback(
+        (updatedItem: ListItemWithData) => {
+            console.log('updateAllStoreItemsAndItemsWithCost called', { updatedItem });
+            setAllStoreItemsWithCost((prev) =>
+                upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+            );
+            setItemsWithCost((prev) => {
+                const newList = upsertIntoArray<ListItemWithData>(
+                    prev ?? [],
+                    updatedItem,
+                    'list_item_id',
+                );
+                updateCheckedItems(newList);
+                return newList;
             });
-        } else {
-            setUncheckedItems((prev) => {
-                return prev?.concat([{ ...updatedItem, completed: false }]);
-            });
-        }
-    }, []);
-
-    const updateAllStoreItemsAndItemsWithCost = useCallback((updatedItem: ListItemWithData) => {
-        setAllStoreItemsWithCost((prev) =>
-            upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
-        );
-        setItemsWithCost((prev) =>
-            upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
-        );
-    }, []);
+        },
+        [updateCheckedItems],
+    );
 
     // Optimistically update the itemsWithCost array with the new item and
     const handleUpdateListItem = useCallback(
         async (itemToUpdate: InitialListItemFormValue) => {
+            console.log('handleUpdateListItem called', { itemToUpdate });
             if (itemToUpdate.item_id && itemToUpdate.list_item_id) {
                 const itemToUpsert = {
                     ...itemToUpdate,
@@ -125,13 +129,11 @@ export const ListItemsProvider = ({
                 } as ListItemWithData;
                 updateAllStoreItemsAndItemsWithCost(itemToUpsert);
                 updateListItem(itemToUpdate);
-                updateCheckedItems(itemToUpsert);
                 return Promise.resolve(itemToUpsert);
             } else {
                 return updateListItem(itemToUpdate)
                     .then((updatedItem) => {
                         updateAllStoreItemsAndItemsWithCost(updatedItem);
-                        updateCheckedItems(updatedItem);
                         return updatedItem;
                     })
                     .catch((e) => {
@@ -141,7 +143,7 @@ export const ListItemsProvider = ({
                     });
             }
         },
-        [updateAllStoreItemsAndItemsWithCost, updateCheckedItems],
+        [updateAllStoreItemsAndItemsWithCost],
     );
 
     const handleRemoveListItem = useCallback(async (itemToRemoveId: number) => {
