@@ -53,21 +53,19 @@ export const ListItemsProvider = ({
     const [unCheckedItems, setUncheckedItems] = useState<ListItemWithData[]>();
     const [checkedItems, setCheckedItems] = useState<ListItemWithData[]>();
 
-    const updateCheckedItems = useCallback((listItems: ListItemWithData[]) => {
-        console.log('updateCheckedItems called');
-        if (listItems.length > 0) {
-            const sortedItems = sortItemsBySection(
-                listItems.sort((a, b) => a.item_name.localeCompare(b.item_name)),
-            );
+    useEffect(() => {
+        if (itemsWithCost && itemsWithCost.length > 0) {
+            // Sort items by item_name and then by store_section
+            const sortedItems = sortItemsBySection(itemsWithCost);
+
             const groupedItems = groupBy(sortedItems, 'completed');
             setCheckedItems(groupedItems['true'] ?? []);
             setUncheckedItems(groupedItems['false'] ?? []);
-            console.log('updateCheckedItems finished');
         } else {
             setCheckedItems([]);
             setUncheckedItems([]);
         }
-    }, []);
+    }, [itemsWithCost]);
 
     useEffect(() => {
         if (list?.list_id && list?.user_id) {
@@ -77,14 +75,13 @@ export const ListItemsProvider = ({
                 await getListItemsWithData(list.list_id, list.user_id)
                     .then((listItems) => {
                         setItemsWithCost(listItems);
-                        updateCheckedItems(listItems);
                     })
                     .catch((e) => console.error(e))
                     .finally(() => setListItemsLoading(false));
             };
             getListItems();
         }
-    }, [list?.list_id, list?.user_id, updateCheckedItems]);
+    }, [list?.list_id, list?.user_id]);
 
     useEffect(() => {
         if (list?.store_id && list?.user_id) {
@@ -98,24 +95,20 @@ export const ListItemsProvider = ({
         }
     }, [list?.store_id, list?.user_id]);
 
-    const updateAllStoreItemsAndItemsWithCost = useCallback(
-        (updatedItem: ListItemWithData) => {
-            console.log('updateAllStoreItemsAndItemsWithCost called', { updatedItem });
-            setAllStoreItemsWithCost((prev) =>
-                upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+    const updateAllStoreItemsAndItemsWithCost = useCallback((updatedItem: ListItemWithData) => {
+        console.log('updateAllStoreItemsAndItemsWithCost called', { updatedItem });
+        setAllStoreItemsWithCost((prev) =>
+            upsertIntoArray<ListItemWithData>(prev ?? [], updatedItem, 'list_item_id'),
+        );
+        setItemsWithCost((prev) => {
+            const newList = upsertIntoArray<ListItemWithData>(
+                prev ?? [],
+                updatedItem,
+                'list_item_id',
             );
-            setItemsWithCost((prev) => {
-                const newList = upsertIntoArray<ListItemWithData>(
-                    prev ?? [],
-                    updatedItem,
-                    'list_item_id',
-                );
-                updateCheckedItems(newList);
-                return newList;
-            });
-        },
-        [updateCheckedItems],
-    );
+            return newList;
+        });
+    }, []);
 
     // Optimistically update the itemsWithCost array with the new item and
     const handleUpdateListItem = useCallback(
@@ -195,11 +188,11 @@ export const useListItemsProviderContext = () => {
     return ctx;
 };
 
-export function sortItemsBySection<T extends object>(
+export function sortItemsBySection<T extends { store_section: StoreSection; item_name: string }>(
     listItems: T[],
     listOrder?: StoreSection[],
 ): T[] {
-    const defaultOrder: StoreSection[] = listOrder ?? [
+    const sectionOrder = listOrder ?? [
         'Produce',
         'Bulk',
         'Meat/Deli',
@@ -209,12 +202,25 @@ export function sortItemsBySection<T extends object>(
         'Non-perishable',
         'Miscellaneous',
     ];
-    const groupedItems: Record<StoreSection, T[]> = groupBy(listItems, 'store_section') as Record<
-        StoreSection,
-        T[]
-    >;
 
-    return defaultOrder.reduce((orderedList, sectionKey) => {
-        return orderedList.concat(groupedItems?.[sectionKey] ?? []);
-    }, [] as T[]);
+    // Create a map of section names to their index in the sectionOrder array
+    const sectionIndexMap = sectionOrder.reduce(
+        (acc, section, index) => {
+            acc[section] = index;
+            return acc;
+        },
+        {} as Record<string, number>,
+    );
+
+    // Sort the listItems array by section and then by item_name
+    return listItems.sort((a, b) => {
+        // Sort by section first and then by item_name
+        const sectionComparison =
+            (sectionIndexMap[a.store_section] ?? Infinity) -
+            (sectionIndexMap[b.store_section] ?? Infinity);
+        if (sectionComparison !== 0) {
+            return sectionComparison;
+        }
+        return a.item_name.localeCompare(b.item_name);
+    });
 }

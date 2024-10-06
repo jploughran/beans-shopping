@@ -1,6 +1,7 @@
 import { Check, GripVertical } from '@tamagui/lucide-icons';
 import { memo, useCallback } from 'react';
 import { RenderItemParams } from 'react-native-draggable-flatlist';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { ListItem, XStack, Checkbox, Label, CheckedState, Theme, ThemeName } from 'tamagui';
 
@@ -88,21 +89,22 @@ const StoreListItem = ({ item, setItemToEdit, drag, isActive }: Props) => {
                                 </Checkbox.Indicator>
                             </Checkbox>
                         </XStack>
-                        <XStack
-                            alignItems="center"
-                            gap="$4"
-                            justifyContent="space-between"
-                            flexGrow={1}
-                            onPress={handleLongPress}
-                            pressStyle={{ backgroundColor: '$green4' }}
-                        >
-                            <Label onPress={handleLongPress}>{item.item_name}</Label>
-                            <Label>
-                                {item.price && item.quantity
-                                    ? `$${(item?.price * item?.quantity).toFixed(2)}`
-                                    : undefined}
-                            </Label>
-                        </XStack>
+                        <TouchableOpacity containerStyle={{ flex: 1 }} onPress={handleLongPress}>
+                            <XStack
+                                alignItems="center"
+                                gap="$4"
+                                justifyContent="space-between"
+                                flexGrow={1}
+                                pressStyle={{ backgroundColor: '$green4' }}
+                            >
+                                <Label>{item.item_name}</Label>
+                                <Label>
+                                    {item.price && item.quantity
+                                        ? `$${(item?.price * item?.quantity).toFixed(2)}`
+                                        : undefined}
+                                </Label>
+                            </XStack>
+                        </TouchableOpacity>
                     </XStack>
                 </ListItem>
             </Theme>
