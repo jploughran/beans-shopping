@@ -21,11 +21,13 @@ export const BottomSheetProvider = ({
     const sheetRef = useRef<BottomSheet>(null);
 
     const handleOpenPress = useCallback(() => {
-        sheetRef.current?.snapToIndex(0);
+        console.log('handleOpenPress called');
+        sheetRef.current?.expand();
     }, []);
 
     const handleClosePress = useCallback(() => {
-        sheetRef.current?.forceClose();
+        console.log('handleClosePress called');
+        sheetRef.current?.close();
     }, []);
 
     const contextValue: BottomSheetProviderContextValues = useMemo(() => {
