@@ -18,6 +18,7 @@ import {
     getListItemsForStore,
     getListItemsWithData,
     handleRemoveSupabaseRow,
+    subscribeToListItemsForStore,
     updateListItem,
 } from '@/modules/supabase-list-utils';
 import { LIST_ITEMS, ListItem, ListItemWithData, StoreSection } from '@/types/list';
@@ -67,23 +68,39 @@ export const ListItemsProvider = ({
         }
     }, [itemsWithCost]);
 
-    useEffect(() => {
-        if (list?.list_id && list?.user_id) {
-            const getListItems = async () => {
-                console.log('[getListItemsWithData] list_id called');
-                setListItemsLoading(true);
-                await getListItemsWithData(list.list_id, list.user_id)
-                    .then((listItems) => {
-                        setItemsWithCost(listItems);
-                    })
-                    .catch((e) => console.error(e))
-                    .finally(() => setListItemsLoading(false));
-            };
-            getListItems();
-        }
-    }, [list?.list_id, list?.user_id]);
+    /**
+     * Fetches list items for the given list ID and user ID.
+     * @param listId The ID of the list to fetch items for.
+     * @param user_id The user ID of the user who owns the list.
+     * @param setLoading Optionally sets the loading state to true.
+     * @returns A Promise that resolves when the list items have been fetched.
+     */
+    const getListItems = useCallback(
+        async (listId: number, user_id: string, setLoading?: boolean) => {
+            setLoading && setListItemsLoading(true);
+            await getListItemsWithData(listId, user_id)
+                .then((listItems) => {
+                    setItemsWithCost(listItems);
+                })
+                .catch((e) => console.error(e))
+                .finally(() => setListItemsLoading(false));
+        },
+        [],
+    );
 
     useEffect(() => {
+        if (list?.list_id && list?.user_id) {
+            getListItems(list.list_id, list.user_id, true);
+        }
+    }, [getListItems, list?.list_id, list?.user_id]);
+
+    useEffect(() => {
+        const channel = subscribeToListItemsForStore(
+            list?.store_id ?? 0,
+            list?.user_id ?? '',
+            getListItems,
+        );
+
         if (list?.store_id && list?.user_id) {
             const getListItems = async () => {
                 console.log('[getListItemsForStore] store_id called');
@@ -93,7 +110,11 @@ export const ListItemsProvider = ({
             };
             getListItems();
         }
-    }, [list?.store_id, list?.user_id]);
+        return () => {
+            console.log('unsubscribing from list items for store');
+            channel.unsubscribe();
+        };
+    }, [getListItems, list?.store_id, list?.user_id]);
 
     const updateAllStoreItemsAndItemsWithCost = useCallback((updatedItem: ListItemWithData) => {
         console.log('updateAllStoreItemsAndItemsWithCost called', { updatedItem });
