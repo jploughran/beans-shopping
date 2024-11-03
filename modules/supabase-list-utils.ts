@@ -2,9 +2,19 @@ import { InitialListItemFormValue } from './add-list-item-validation';
 import { supabase } from './supabase';
 
 import { ItemFormInitialValues } from '@/components/AddStoreItemForm';
-import { ITEMS, LISTS, LIST_ITEMS, List, ListItemWithData, Store, StoreItem } from '@/types/list';
+import {
+    ITEMS,
+    LISTS,
+    LIST_ITEMS,
+    List,
+    ListItem,
+    ListItemWithData,
+    Store,
+    StoreItem,
+} from '@/types/list';
 import { Database, ExistingTables, InsertType, RowType } from '@/types/supabase';
 import { breadcrumb, logError } from '@/utils/logging';
+import { SetStateAction } from 'react';
 
 export const addListToTable = async (storeId: number, listName: string) => {
     breadcrumb(`[addListToTable]`, 'supabase-utils', { storeId, listName });
@@ -222,6 +232,38 @@ export const getListItemsWithData = async (listId: number, user_id: string) => {
                 return Promise.reject(error);
             }
         });
+};
+
+/**
+ * Subscribes to changes in the list_items table for the given store ID and user ID.
+ * @param storeId The ID of the store to subscribe to.
+ * @param user_id The user ID of the user who owns the store.
+ * @param getListItems A function that fetches list items for a given list ID and user ID.
+ * @returns A channel object that can be used to unsubscribe from the subscription.
+ */
+
+export const subscribeToListItemsForStore = (
+    storeId: number,
+    user_id: string,
+    getListItems: (listId: number, user_id: string, setLoading?: boolean) => Promise<void>,
+) => {
+    breadcrumb(`[subscribeToListItemsForStore]`, 'supabase-utils', { storeId, user_id });
+    return supabase
+        .channel('custom-filter-channel')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'list_items',
+                filter: `user_id=eq.${user_id}`,
+            },
+            async (payload) => {
+                const { list_id } = payload.new as ListItem;
+                await getListItems(list_id, user_id, false);
+            },
+        )
+        .subscribe();
 };
 
 export const getListItemsForStore = async (storeId: number, user_id: string) => {

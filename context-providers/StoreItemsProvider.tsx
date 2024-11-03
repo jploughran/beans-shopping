@@ -120,7 +120,7 @@ export const StoreItemProvider = ({
                     }));
                 })
                 .catch((e) => {
-                    console.log('Error in [handleUpdateListItem]', { e });
+                    console.log('Error in [handleRemoveStoreItem]', { e });
                     logError(e, 1);
                     return Promise.reject(e);
                 });

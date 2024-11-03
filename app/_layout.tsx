@@ -72,15 +72,17 @@ function RootLayoutNav() {
                 defaultTheme={colorScheme as string | undefined}
             >
                 <ThemeProvider value={LightTheme}>
-                    <Theme name="green">
-                        <UserProvider>
-                            <ToastProvider>
-                                <SimpleErrorBoundary location="app_layout">
-                                    <Slot />
-                                    <SafeToastViewport />
-                                </SimpleErrorBoundary>
-                            </ToastProvider>
-                        </UserProvider>
+                    <Theme name="light">
+                        <Theme name="green">
+                            <UserProvider>
+                                <ToastProvider>
+                                    <SimpleErrorBoundary location="app_layout">
+                                        <Slot />
+                                        <SafeToastViewport />
+                                    </SimpleErrorBoundary>
+                                </ToastProvider>
+                            </UserProvider>
+                        </Theme>
                     </Theme>
                 </ThemeProvider>
             </TamaguiProvider>

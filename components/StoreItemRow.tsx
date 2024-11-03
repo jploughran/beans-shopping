@@ -1,4 +1,3 @@
-import { GripVertical } from '@tamagui/lucide-icons';
 import { memo, useCallback } from 'react';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { ListItem, XStack, Label, Theme, ThemeName } from 'tamagui';

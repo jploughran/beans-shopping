@@ -45,7 +45,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                       store_id: selectedList?.store_id ?? 0,
                       user_id: selectedList?.user_id ?? '',
                       list_order: itemsWithCost?.length ?? 0,
-                      store_section: 'Miscellaneous',
+                      store_section: 'Produce',
                   },
         [
             itemToEdit,
@@ -79,7 +79,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
             validateOnMount
             enableReinitialize
         >
-            {({ values, errors, setFieldValue, handleSubmit, isValid }) => (
+            {({ values, errors, setFieldValue, handleSubmit, isValid, resetForm }) => (
                 <BottomSheetView style={{ flex: 1 }}>
                     <LoadingView
                         loading={loading}
@@ -170,6 +170,7 @@ export function AddListItemForm({ itemToEdit }: Props) {
                                             borderWidth="$0.25"
                                             size="$3"
                                             onPress={() => {
+                                                resetForm();
                                                 handleClosePress();
                                             }}
                                         >

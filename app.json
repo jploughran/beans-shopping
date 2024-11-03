@@ -2,7 +2,7 @@
     "expo": {
         "name": "Bean Shopping",
         "slug": "beans-shopping",
-        "version": "1.0.20",
+        "version": "1.0.27",
         "extra": {
             "eas": {
                 "projectId": "0f0470e8-27d5-48e8-b24d-03f5c89d1ee0"
@@ -49,7 +49,10 @@
                     "project": "bean-list-app",
                     "organization": "bean-app"
                 }
-            ]
+            ],
+            "expo-font",
+            "expo-router",
+            "expo-secure-store"
         ]
     }
 }
